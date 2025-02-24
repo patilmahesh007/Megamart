@@ -2,11 +2,10 @@
   "name": "server",
   "version": "1.0.0",
   "main": "index.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon inndex.js"
-
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +18,9 @@
     "express": "^4.21.2",
     "firebase-admin": "^13.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.10.1",
+    "mongoose": "^8.10.1"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.9"
   }
 }

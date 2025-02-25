@@ -12,6 +12,7 @@ import cors from "cors";
 import userrouter from "./routes/auth.routes.js";
 import productrouter from "./routes/product.routes.js";
 import orderRouter from "./order.routes.js";
+import cartRouter from "./cart.routes.js";
 
 
 
@@ -29,6 +30,7 @@ app.get("/health", (req, res) => {
 app.use("/api", userrouter);
 app.use("/product", productrouter);
 router.use("/order", orderRouter);
+router.use("/cart", cartRouter);
 
 
 

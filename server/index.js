@@ -1,10 +1,36 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import "./models/category.model.js"; 
+
+
 import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
+
+
 import userrouter from "./routes/auth.routes.js";
+import productrouter from "./routes/product.routes.js";
+
+
+
+const app = express();
+app.use(express.json());
+app.use(cors());
+
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    message: "server is running",
+  });
+});
+
+app.use("/api", userrouter);
+app.use("/product", productrouter);
+
+
+
+
 
 const connectDB = async () => {
   try {
@@ -19,22 +45,7 @@ const connectDB = async () => {
   }
 };
 
-// Connect to the database before starting the server.
 connectDB();
-
-const app = express();
-app.use(express.json());
-app.use(cors());
-
-app.get("/health", (req, res) => {
-  res.json({
-    status: "ok",
-    message: "server is running",
-  });
-});
-
-app.use("/api", userrouter);
-
 const port = process.env.PORT || 5000;
 app.listen(port, () => {
   console.log(`server is running on ${port}`);

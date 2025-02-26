@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+  import mongoose from 'mongoose';
 
 const AddressSchema = new mongoose.Schema({
   street: { type: String },

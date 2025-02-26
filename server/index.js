@@ -1,20 +1,20 @@
+
 import dotenv from "dotenv";
 dotenv.config();
 
 import "./models/category.model.js"; 
-
-
 import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
 
-
 import userrouter from "./routes/auth.routes.js";
 import productrouter from "./routes/product.routes.js";
-import orderRouter from "./order.routes.js";
-import cartRouter from "./cart.routes.js";
-
-
+import orderRouter from "./routes/order.routes.js";
+import cartRouter from "./routes/cart.routes.js";
+import paymentRouter from "./routes/payment.routes.js";
+import reviewRouter from "./routes/review.routes.js";
+import membershipRouter from "./routes/membership.routes.js";
+import uploadRouter from "./routes/upload.routes.js";
 
 const app = express();
 app.use(express.json());
@@ -29,12 +29,12 @@ app.get("/health", (req, res) => {
 
 app.use("/api", userrouter);
 app.use("/product", productrouter);
-router.use("/order", orderRouter);
-router.use("/cart", cartRouter);
-
-
-
-
+app.use("/order", orderRouter);
+app.use("/cart", cartRouter);
+app.use("/payment", paymentRouter);
+app.use("/review", reviewRouter);
+app.use("/membership", membershipRouter);
+app.use("/upload", uploadRouter);
 
 const connectDB = async () => {
   try {

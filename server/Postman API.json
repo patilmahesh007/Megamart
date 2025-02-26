@@ -1,0 +1,602 @@
+{
+	"info": {
+	  "_postman_id": "327446a6-03f7-4d91-9b1c-b7c5b5c249ce",
+	  "name": "Megamart API new",
+	  "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+	  {
+		"name": "Product",
+		"item": [
+		  {
+			"name": "Product - Add",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"name\": \"Product 1\",\n    \"description\": \"A description for product 1.\",\n    \"currentPrice\": 121,\n    \"originalPrice\": 121212,\n    \"category\": \"603d2f1b2c1f4b4b1c8a2d3e\",\n    \"mainImage\": \"https://example.com/main.jpg\",\n    \"images\": [\n        \"https://example.com/img1.jpg\",\n        \"https://example.com/img2.jpg\"\n    ],\n    \"stock\": 1212\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/product/add",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "product",
+				  "add"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Product - List",
+			"request": {
+			  "method": "GET",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5112/product/list",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "product",
+				  "list"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Product - Get By ID",
+			"request": {
+			  "method": "GET",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5112/product/get/67bde99b94f445a4c0fa4ee1",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "product",
+				  "get",
+				  "67bde99b94f445a4c0fa4ee1"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Product - Update",
+			"request": {
+			  "method": "PUT",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n  \"name\": \"Updated Product Name\",\n  \"description\": \"Updated description.\",\n  \"currentPrice\": 150\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/product/update/67bde99b94f445a4c0fa4ee1",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "product",
+				  "update",
+				  "67bde99b94f445a4c0fa4ee1"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Product - Delete",
+			"request": {
+			  "method": "DELETE",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5112/product/delete/67bde99b94f445a4c0fa4ee1",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "product",
+				  "delete",
+				  "67bde99b94f445a4c0fa4ee1"
+				]
+			  }
+			},
+			"response": []
+		  }
+		]
+	  },
+	  {
+		"name": "Order",
+		"item": [
+		  {
+			"name": "Order - Create",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n    \"user\": \"67b95e671fea9e642de693f9\",\n    \"orderItems\": [\n        { \"product\": \"67bd6f45b422626986829543\", \"quantity\": 2, \"price\": 121 }\n    ],\n    \"totalPrice\": 242,\n    \"shippingAddress\": {\n        \"street\": \"123 Main St\",\n        \"city\": \"City\",\n        \"state\": \"State\",\n        \"zipCode\": \"12345\",\n        \"country\": \"Country\"\n    }\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/order/create",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "order",
+				  "create"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Order - Get",
+			"request": {
+			  "method": "GET",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5112/order/get/67bdea1a94f445a4c0fa4ee8",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "order",
+				  "get",
+				  "67bdea1a94f445a4c0fa4ee8"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Order - Update Status",
+			"request": {
+			  "method": "PUT",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n  \"status\": \"shipped\"\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/api/order/update-status/67bdea1a94f445a4c0fa4ee8",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "api",
+				  "order",
+				  "update-status",
+				  "67bdea1a94f445a4c0fa4ee8"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Order - List",
+			"request": {
+			  "method": "GET",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5112/order/list",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "order",
+				  "list"
+				]
+			  }
+			},
+			"response": []
+		  }
+		]
+	  },
+	  {
+		"name": "Cart",
+		"item": [
+		  {
+			"name": "Cart - Get",
+			"request": {
+			  "method": "GET",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5112/cart/get/67b95e671fea9e642de693f9",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "cart",
+				  "get",
+				  "67b95e671fea9e642de693f9"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Cart - Add",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n  \"userId\": \"67b95e671fea9e642de693f9\",\n  \"product\": \"67bd6f45b422626986829543\",\n  \"quantity\": 2\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/cart/add",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "cart",
+				  "add"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Cart - Remove",
+			"request": {
+			  "method": "DELETE",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n  \"userId\": \"67b95e671fea9e642de693f9\",\n  \"product\": \"67bd6f45b422626986829543\"\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/cart/remove",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "cart",
+				  "remove"
+				]
+			  }
+			},
+			"response": []
+		  }
+		]
+	  },
+	  {
+		"name": "Payment",
+		"item": [
+		  {
+			"name": "Payment - Create Order",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n  \"amount\": 500,\n  \"currency\": \"INR\"\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/payment/create-order",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "payment",
+				  "create-order"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Payment - Verify",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"paymentId\": \"{{paymentId}}\",\n  \"signature\": \"{{signature}}\",\n  \"amount\": 500,\n  \"userId\": \"{{userId}}\"\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5000/api/payment/verify",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5000",
+				"path": [
+				  "api",
+				  "payment",
+				  "verify"
+				]
+			  }
+			},
+			"response": []
+		  }
+		]
+	  },
+	  {
+		"name": "Review",
+		"item": [
+		  {
+			"name": "Review - Add",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n  \"user\": \"{{userId}}\",\n  \"product\": \"{{productId}}\",\n  \"rating\": 5,\n  \"comment\": \"Excellent product!\"\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/review/add",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "review",
+				  "add"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Review - Update",
+			"request": {
+			  "method": "PUT",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n  \"rating\": 4,\n  \"comment\": \"Good product, but could be better.\"\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/review/update/{{reviewId}}",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "review",
+				  "update",
+				  "{{reviewId}}"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Review - Delete",
+			"request": {
+			  "method": "DELETE",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5112/review/delete/{{reviewId}}",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "review",
+				  "delete",
+				  "{{reviewId}}"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Review - List",
+			"request": {
+			  "method": "GET",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5112/review/list/67bd6f45b422626986829543",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "review",
+				  "list",
+				  "67bd6f45b422626986829543"
+				]
+			  }
+			},
+			"response": []
+		  }
+		]
+	  },
+	  {
+		"name": "Membership",
+		"item": [
+		  {
+			"name": "Membership - List Plans",
+			"request": {
+			  "method": "GET",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5112/membership/plans",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "membership",
+				  "plans"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Membership - Purchase",
+			"request": {
+			  "method": "POST",
+			  "header": [
+				{
+				  "key": "Content-Type",
+				  "value": "application/json"
+				}
+			  ],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\n  \"userId\": \"{{userId}}\",\n  \"planId\": \"{{planId}}\",\n  \"paymentId\": \"{{paymentId}}\"\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5000/api/membership/buy",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5000",
+				"path": [
+				  "api",
+				  "membership",
+				  "buy"
+				]
+			  }
+			},
+			"response": []
+		  },
+		  {
+			"name": "Membership - Status",
+			"request": {
+			  "method": "GET",
+			  "header": [],
+			  "url": {
+				"raw": "http://localhost:5000/api/membership/status/{{userId}}",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5000",
+				"path": [
+				  "api",
+				  "membership",
+				  "status",
+				  "{{userId}}"
+				]
+			  }
+			},
+			"response": []
+		  }
+		]
+	  },
+	  {
+		"name": "Upload",
+		"item": [
+		  {
+			"name": "upload img",
+			"request": {
+			  "method": "POST",
+			  "header": [],
+			  "body": {
+				"mode": "raw",
+				"raw": "{\r\n  \"userId\":\"67b95e671fea9e642de693f9\",\"type\":\"profile\",\"productId\":\"67bd6f45b422626986829543\"\r\n}"
+			  },
+			  "url": {
+				"raw": "http://localhost:5112/upload/img",
+				"protocol": "http",
+				"host": [
+				  "localhost"
+				],
+				"port": "5112",
+				"path": [
+				  "upload",
+				  "img"
+				]
+			  }
+			},
+			"response": []
+		  }
+		]
+	  }
+	]
+  }
+  

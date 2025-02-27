@@ -3,23 +3,39 @@ import { successResponse, errorResponse } from "../utils/responder.util.js";
 
 export const addProduct = async (req, res) => {
   try {
-    const { name, description, currentPrice, originalPrice, category, mainImage, images, stock } = req.body;
-    if (!name || !description || currentPrice == null || originalPrice == null || !category || !mainImage || !images || stock == null) {
+        const { name, description, currentPrice, originalPrice, category, stock } = req.body;
+    
+    if (!name || !description || currentPrice == null || originalPrice == null || !category || stock == null) {
       return errorResponse(res, "All fields are required", 400);
     }
     if (isNaN(currentPrice) || isNaN(originalPrice) || isNaN(stock)) {
       return errorResponse(res, "Current price, original price, and stock must be numbers", 400);
     }
+    
+    let mainImageUrl = "";
+    let imagesUrls = [];
+    
+    if (req.files && req.files.mainImage && req.files.mainImage.length > 0) {
+      mainImageUrl = req.files.mainImage[0].path;
+    } else {
+      return errorResponse(res, "Main image is required", 400);
+    }
+    
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      imagesUrls = req.files.images.map(file => file.path);
+    }
+    
     const product = new Product({
       name,
       description,
       currentPrice,
       originalPrice,
       category,
-      mainImage,
-      images,
+      mainImage: mainImageUrl,
+      images: imagesUrls,
       stock,
     });
+    
     await product.save();
     return successResponse(res, "Product added successfully", product, 201);
   } catch (error) {
@@ -77,6 +93,17 @@ export const listProducts = async (req, res) => {
     return successResponse(res, "Products fetched successfully", products, 200);
   } catch (error) {
     console.error("Error listing products:", error);
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+export const listProductsByCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const products = await Product.find({ id }).populate("category");
+    return successResponse(res, "Products fetched successfully", products, 200);
+  } catch (error) {
+    console.error("Error listing products by category:", error);
     return errorResponse(res, error.message, 500);
   }
 };

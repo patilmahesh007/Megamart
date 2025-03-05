@@ -79,7 +79,7 @@ const OTPVerification = () => {
       const { data } = await axios.post("http://localhost:5112/api/verify", {
         phone: mobileNumber,
         otp: otpString,
-      });
+      },{ withCredentials: true });
       toast.success(data.messages || "OTP verified successfully");
       setTimeout(() => {
         navigate("/dashboard");

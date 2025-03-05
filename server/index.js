@@ -20,9 +20,11 @@ import categoryRouter from "./routes/category.routes.js";
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: "http://localhost:5173", 
+  origin: "http://localhost:5173",
   credentials: true,
 }));
+app.options("*", cors()); 
+
 
 app.use(cookieSession({
   name: 'widget_session',

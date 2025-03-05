@@ -25,12 +25,17 @@ app.use(cors({
 }));
 
 app.use(cookieSession({
-  name: 'session',
+  name: 'widget_session',
   keys: [process.env.SESSION_SECRET],
   maxAge: 24 * 60 * 60 * 1000, 
-  sameSite: "none", 
+  sameSite: "none",        
   secure: process.env.NODE_ENV === "production",
 }));
+
+app.get("/setcookie", (req, res) => {
+  req.session.value = "abc123";
+  res.send("Cookie set with value abc123");
+});
 
 app.get("/health", (req, res) => {
   res.json({

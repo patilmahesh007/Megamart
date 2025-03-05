@@ -3,6 +3,7 @@ import getotp from "../config/generateOTP.js";
 import createMessage from "../config/twilio.js";
 import bcrypt from "bcrypt";
 
+// Sends an OTP to the user's phone number.
 export const sendOtp = async (req, res) => {
   try {
     const { phone } = req.body;
@@ -28,6 +29,8 @@ export const sendOtp = async (req, res) => {
   }
 };
 
+// For testing purposes only: returns the hashed OTP from the database.
+// In production, consider removing or restricting this endpoint.
 export const getOtp = async (req, res) => {
   try {
     const { phone } = req.query;
@@ -48,6 +51,8 @@ export const getOtp = async (req, res) => {
   }
 };
 
+// Verifies the OTP entered by the user.
+// If successful, marks the user as verified and stores the user's ID in the session.
 export const verifyOtp = async (req, res) => {
   try {
     const { phone, otp } = req.body;
@@ -66,8 +71,10 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ error: "Invalid OTP. Please try again." });
     }
     
+    // Mark the user as verified
     user.isVerified = true;
     
+    // Store the user's ID in the session (using cookie-session)
     req.session.userId = user._id;
     
     await user.clearOtp();

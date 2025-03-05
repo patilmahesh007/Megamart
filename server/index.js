@@ -1,14 +1,14 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-// Validate environment variables before anything else
+// Validate critical environment variables
 if (!process.env.SESSION_SECRET) throw new Error("Missing SESSION_SECRET");
 if (!process.env.MONGO_URI) throw new Error("Missing MONGO_URI");
 if (process.env.NODE_ENV === "production" && !process.env.CLIENT_URL) {
   throw new Error("CLIENT_URL required in production");
 }
 
-// Force production environment if deployed
+// Force production environment if deployed on Vercel or AWS Lambda
 if (process.env.VERCEL || process.env.AWS_EXECUTION_ENV) {
   process.env.NODE_ENV = "production";
 }
@@ -23,145 +23,164 @@ import helmet from "helmet";
 // Routers
 import userrouter from "./routes/auth.routes.js";
 import productrouter from "./routes/product.routes.js";
+// ... import other routers as needed
 
 const app = express();
 
-// Security Middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "trusted-cdn.com"],
-    }
-  },
-  hsts: {
-    maxAge: 63072000,
-    includeSubDomains: true,
-    preload: true
-  }
-}));
+// --- Security Middleware --- //
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "trusted-cdn.com"],
+      },
+    },
+    hsts:
+      process.env.NODE_ENV === "production"
+        ? {
+            maxAge: 63072000,
+            includeSubDomains: true,
+            preload: true,
+          }
+        : false,
+  })
+);
 
-// Critical proxy configuration
+// Set trust proxy for secure cookies when behind a proxy
 app.set("trust proxy", process.env.NODE_ENV === "production" ? 2 : 0);
 
-// CORS Configuration
+// --- CORS Configuration --- //
 const corsOptions = {
-  origin: process.env.NODE_ENV === "production" 
-    ? process.env.CLIENT_URL.split(",")
-    : "http://localhost:5173",
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.CLIENT_URL.split(",")
+      : "http://localhost:5173",
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  exposedHeaders: ["Set-Cookie"],
+  exposedHeaders: ["Set-Cookie", "Authorization"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  maxAge: 86400
+  maxAge: 86400,
 };
 app.use(cors(corsOptions));
+// Ensure preflight requests are handled
+app.options("*", cors());
 
-// Body Parser
+// --- Body Parsing --- //
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(express.text({ type: "text/plain" }));
 
-// Session Configuration
+// --- Session Configuration --- //
 app.use(
   cookieSession({
     name: "widget_session",
     keys: [process.env.SESSION_SECRET],
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    secure: process.env.NODE_ENV === "production",
-    domain: process.env.NODE_ENV === "production" 
-      ? ".your-actual-domain.com" // Change to your real domain
-      : undefined,
+    secure: process.env.NODE_ENV === "production", // true if using HTTPS
+    // In production, use just the domain name (without protocol or port)
+    domain:
+      process.env.NODE_ENV === "production" ? "yourdomain.com" : undefined,
     httpOnly: true,
     path: "/",
     overwrite: true,
-    signed: true
+    signed: true,
+    proxy: true,
   })
 );
 
-// Session Validation Middleware
+// --- Session Validation Middleware --- //
 app.use((req, res, next) => {
   if (!req.session) {
-    console.error("Session initialization failed - Headers:", req.headers);
-    return res.status(500).json({
-      error: "Session initialization failed",
-      cookiesReceived: req.headers.cookie || "none",
-      secureConnection: req.secure
+    console.error("Session initialization failed", {
+      host: req.headers.host,
+      origin: req.headers.origin,
+      cookie: req.headers.cookie,
     });
+    return res.status(500).json({ error: "Session initialization failed" });
   }
+  // Add security headers for session cookies
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("X-Content-Type-Options", "nosniff");
   next();
 });
 
-// Enhanced Test Endpoint
-app.get("/setcookie", (req, res) => {
-  req.session.value = `test-${Date.now()}`;
-  res.cookie("explicit_cookie", "works", {
-    sameSite: "none",
-    secure: true,
+// --- Test Endpoints --- //
+app.get("/cookie-test", (req, res) => {
+  // Increment visit counter in session
+  req.session.visits = (req.session.visits || 0) + 1;
+
+  // Also set an explicit cookie (for demonstration)
+  res.cookie("explicit_cookie", `test-${Date.now()}`, {
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     httpOnly: true,
-    domain: process.env.NODE_ENV === "production" 
-      ? ".your-actual-domain.com" 
-      : undefined,
-    path: "/"
+    domain: process.env.NODE_ENV === "production" ? "yourdomain.com" : undefined,
+    path: "/",
+    maxAge: 3600000, // 1 hour
   });
-  
+
   res.json({
-    message: "Cookies set",
-    sessionId: req.session.id,
-    headers: {
-      protocol: req.protocol,
-      secure: req.secure,
-      host: req.get("host")
-    }
+    success: true,
+    session: req.session,
+    cookies: req.headers.cookie,
   });
 });
 
-// Diagnostic Health Check
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",
     sessionInitialized: !!req.session,
     environment: process.env.NODE_ENV,
-    secureConnection: req.secure,
+    secure: req.secure,
     protocol: req.protocol,
-    hostHeader: req.get("host"),
-    clientIp: req.ip
+    host: req.get("host"),
+    clientIp: req.ip,
   });
 });
 
-// Routes
+// --- API Routes --- //
 app.use("/api", userrouter);
 app.use("/product", productrouter);
+// ... mount other routers as needed
 
-// Database Connection
+// --- Database Connection --- //
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       bufferCommands: false,
-      autoIndex: process.env.NODE_ENV !== "production"
+      autoIndex: process.env.NODE_ENV !== "production",
     });
-    console.log("Database connected successfully");
+    console.log(`MongoDB connected: ${conn.connection.host}`);
+    mongoose.connection.on("error", (err) => {
+      console.error("MongoDB connection error:", err);
+    });
   } catch (error) {
     console.error("Database connection error:", error);
     process.exit(1);
   }
 };
 
-// Server Initialization
+// --- Server Initialization --- //
 const startServer = async () => {
   await connectDB();
-  
   const port = process.env.PORT || 5000;
   const server = app.listen(port, () => {
-    console.log(`Server running in ${process.env.NODE_ENV || "development"} mode on port ${port}`);
+    console.log(
+      `Server running in ${process.env.NODE_ENV || "development"} mode on port ${port}`
+    );
   });
 
-  // Production-specific optimizations
   if (process.env.NODE_ENV === "production") {
     server.keepAliveTimeout = 65000;
     server.headersTimeout = 66000;
+    server.on("clientError", (err, socket) => {
+      console.error("Client connection error:", err);
+      socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
+    });
   }
 };
 

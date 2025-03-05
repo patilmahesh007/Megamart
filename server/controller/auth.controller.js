@@ -73,6 +73,8 @@ export const verifyOtp = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true, 
     });
+res.session.token = token
+
     user.isVerified = true;
     await user.clearOtp();
 

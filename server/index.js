@@ -1,4 +1,3 @@
-
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -22,26 +21,24 @@ import session from "express-session";
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "http://localhost:5173", 
   credentials: true,
 }));
 
+const isProduction = process.env.NODE_ENV === "production";
 app.use(
   session({
     name: "widget_session", 
     secret: process.env.SESSION_SECRET, 
     resave: false,
     saveUninitialized: false,
-  
     cookie: {
       maxAge: 24 * 60 * 60 * 1000, 
-      sameSite: "none",
-      secure: true
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction, 
     },
   })
 );
-
-
 
 app.get("/health", (req, res) => {
   res.json({

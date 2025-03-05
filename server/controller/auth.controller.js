@@ -71,7 +71,7 @@ export const verifyOtp = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     })
-    req.session.token = token
+    req.session.id = user._id;
     await user.clearOtp();
     return res.json({ message: "OTP verified successfully. User logged in." });
   } catch (error) {

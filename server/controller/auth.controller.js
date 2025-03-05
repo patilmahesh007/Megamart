@@ -2,8 +2,7 @@ import User from "./../models/auth.model.js";
 import getotp from "../config/generateOTP.js";
 import createMessage from "../config/twilio.js";
 import bcrypt from "bcrypt";
-
-// Sends an OTP to the user's phone number.
+import jwt from "jsonwebtoken";
 export const sendOtp = async (req, res) => {
   try {
     const { phone } = req.body;
@@ -29,8 +28,6 @@ export const sendOtp = async (req, res) => {
   }
 };
 
-// For testing purposes only: returns the hashed OTP from the database.
-// In production, consider removing or restricting this endpoint.
 export const getOtp = async (req, res) => {
   try {
     const { phone } = req.query;
@@ -51,8 +48,6 @@ export const getOtp = async (req, res) => {
   }
 };
 
-// Verifies the OTP entered by the user.
-// If successful, marks the user as verified and stores the user's ID in the session.
 export const verifyOtp = async (req, res) => {
   try {
     const { phone, otp } = req.body;
@@ -70,14 +65,17 @@ export const verifyOtp = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid OTP. Please try again." });
     }
-    
-    // Mark the user as verified
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    })
+
+    res.cookie("token", token, {
+      httpOnly: true, 
+    });
     user.isVerified = true;
-    
-    // Store the user's ID in the session (using cookie-session)
-    req.session.userId = user._id;
-    
     await user.clearOtp();
+
     return res.json({ message: "OTP verified successfully. User logged in." });
   } catch (error) {
     console.error("Error verifying OTP:", error);

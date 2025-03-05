@@ -1,4 +1,3 @@
-
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -6,7 +5,7 @@ import "./models/category.model.js";
 import mongoose from "mongoose";
 import express from "express";
 import cors from "cors";
-import session from "express-session";
+import cookieSession from "cookie-session";
 
 import userrouter from "./routes/auth.routes.js";
 import productrouter from "./routes/product.routes.js";
@@ -18,7 +17,6 @@ import membershipRouter from "./routes/membership.routes.js";
 import uploadRouter from "./routes/upload.routes.js";
 import categoryRouter from "./routes/category.routes.js"; 
 
-
 const app = express();
 app.use(express.json());
 app.use(cors({
@@ -26,17 +24,12 @@ app.use(cors({
   credentials: true,
 }));
 
-
-
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 60000,
-    sameSite: "none",  
-    secure: true  
-  },
+app.use(cookieSession({
+  name: 'session',
+  keys: [process.env.SESSION_SECRET],
+  maxAge: 24 * 60 * 60 * 1000, 
+  sameSite: "none", 
+  secure: process.env.NODE_ENV === "production",
 }));
 
 app.get("/health", (req, res) => {
@@ -45,6 +38,7 @@ app.get("/health", (req, res) => {
     message: "server is running",
   });
 });
+
 app.use("/api", userrouter);
 app.use("/product", productrouter);
 app.use("/order", orderRouter);
@@ -53,16 +47,11 @@ app.use("/payment", paymentRouter);
 app.use("/review", reviewRouter);
 app.use("/membership", membershipRouter);
 app.use("/upload", uploadRouter);
-app.use("/category", categoryRouter); 
-
-
-
+app.use("/category", categoryRouter);
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-     
-    });
+    await mongoose.connect(process.env.MONGO_URI);
     console.log("Database connected successfully");
   } catch (error) {
     console.error("Error connecting to database:", error);

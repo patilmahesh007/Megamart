@@ -2,8 +2,6 @@ import User from "./../models/auth.model.js";
 import getotp from "../config/generateOTP.js";
 import createMessage from "../config/twilio.js";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-
 
 export const sendOtp = async (req, res) => {
   try {
@@ -67,11 +65,11 @@ export const verifyOtp = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid OTP. Please try again." });
     }
+    
     user.isVerified = true;
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    })
-    req.session.id = user._id;
+    
+    req.session.userId = user._id;
+    
     await user.clearOtp();
     return res.json({ message: "OTP verified successfully. User logged in." });
   } catch (error) {

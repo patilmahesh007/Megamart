@@ -32,7 +32,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 60000 }
+  cookie: {
+    maxAge: 60000,
+    sameSite: "none",  
+    secure: process.env.NODE_ENV === "production", 
+  },
 }));
 
 app.get("/health", (req, res) => {

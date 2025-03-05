@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate, Link } from "react-router-dom";
 import bcrypt from "bcryptjs";
-import { ArrowLeft,User } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
+import api from "../util/api.util.js";
 
 const OTPVerification = () => {
   const [step, setStep] = useState(1);
@@ -18,9 +18,7 @@ const OTPVerification = () => {
       return;
     }
     try {
-      const response = await axios.post("http://localhost:5112/api/send", {
-        phone: mobileNumber,
-      });
+      const response = await api.post("/api/send", { phone: mobileNumber });
       toast.success(response.data.messages || "OTP sent successfully");
       setStep(2);
     } catch (error) {
@@ -60,7 +58,7 @@ const OTPVerification = () => {
       return;
     }
     try {
-      const getResponse = await axios.get("http://localhost:5112/api/current-otp", {
+      const getResponse = await api.get("/api/current-otp", {
         params: { phone: mobileNumber },
       });
       const currentHashedOtp = getResponse.data.otp;
@@ -76,10 +74,10 @@ const OTPVerification = () => {
     }
     
     try {
-      const { data } = await axios.post("http://localhost:5112/api/verify", {
+      const { data } = await api.post("/api/verify", {
         phone: mobileNumber,
         otp: otpString,
-      },{ withCredentials: true });
+      });
       toast.success(data.messages || "OTP verified successfully");
       setTimeout(() => {
         navigate("/dashboard");
@@ -91,7 +89,7 @@ const OTPVerification = () => {
 
   const handleResendOTP = async () => {
     try {
-      const response = await axios.post("http://localhost:5112/api/send", {
+      const response = await api.post("/api/send", {
         phone: mobileNumber,
       });
       toast.success(response.data.messages || "OTP resent successfully");

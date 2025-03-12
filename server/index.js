@@ -15,6 +15,7 @@ import reviewRouter from "./routes/review.routes.js";
 import membershipRouter from "./routes/membership.routes.js";
 import uploadRouter from "./routes/upload.routes.js";
 import categoryRouter from "./routes/category.routes.js"; 
+import userRouter from "./routes/user.routes.js";
 
 import session from "express-session";
 
@@ -56,6 +57,7 @@ app.use("/review", reviewRouter);
 app.use("/membership", membershipRouter);
 app.use("/upload", uploadRouter);
 app.use("/category", categoryRouter); 
+app.use("/users", userRouter);
 
 const connectDB = async () => {
   try {

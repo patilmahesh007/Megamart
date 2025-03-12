@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, lowercase: true, trim: true, unique: true},
   password: { type: String },
   phone: { type: String, required: true, unique: true, trim: true },
+  disabled: { type: Boolean, default: false },
   profileImage: { type: String },
   otp: { type: String },
   otpExpiresAt: { type: Date },

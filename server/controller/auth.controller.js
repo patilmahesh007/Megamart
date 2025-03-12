@@ -47,8 +47,7 @@ export const getOtp = async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch OTP." });
   }
 };
-
-export const verifyOtp = async (req, res) => {
+ export const verifyOtp = async (req, res) => {
   try {
     const { phone, otp } = req.body;
     if (!phone || !otp) {
@@ -66,21 +65,55 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ error: "Invalid OTP. Please try again." });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    })
+    // Generate JWT token with _id and name stored in the payload
+    const token = jwt.sign(
+      { _id: user._id, name: user.name },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
 
+    // Set cookie with the generated token
     res.cookie("token", token, {
-      httpOnly: true, 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // use secure flag in production
+      sameSite: "None",
     });
-res.session.token = token
+    
+    if (req.session) {
+      req.session.token = token;
+    }
 
     user.isVerified = true;
     await user.clearOtp();
 
-    return res.json({ message: "OTP verified successfully. User logged in." });
+    return res.json({ message: "OTP verified successfully. User logged in.", token });
   } catch (error) {
     console.error("Error verifying OTP:", error);
     return res.status(500).json({ error: "OTP verification failed." });
+  }
+};
+export const verifyRole = async (req, res) => {
+  try {
+    console.log(req);
+    let token = req.headers.authorization?.split(" ")[1] || req.body.token;
+
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized. No token provided." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded || !decoded._id) {
+      return res.status(401).json({ error: "Unauthorized. Invalid token." });
+    }
+
+    const user = await User.findById(decoded._id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    return res.json({ role: user.role });
+  } catch (error) {
+    console.error("Error verifying role:", error);
+    return res.status(500).json({ error: "Failed to verify role." });
   }
 };

@@ -78,6 +78,10 @@ const OTPVerification = () => {
         phone: mobileNumber,
         otp: otpString,
       });
+      // Store the token in localStorage under the key "token"
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+      }
       toast.success(data.messages || "OTP verified successfully");
       setTimeout(() => {
         navigate("/dashboard");
@@ -184,5 +188,5 @@ const OTPVerification = () => {
     </div>
   );
 };
-
+ 
 export default OTPVerification;

@@ -29,7 +29,7 @@ const OrderSchema = new mongoose.Schema({
   },
   trackingNumber: { type: String },
   notes: { type: String },
-}, {
+  createdAt: { type: Date, default: Date.now }} , {
   timestamps: true,
 });
 

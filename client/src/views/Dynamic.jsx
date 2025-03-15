@@ -5,6 +5,7 @@ import User from "./admin/user.jsx";
 import Order from "./admin/order.jsx";
 import Product from "./admin/product.jsx";
 import sales from "./admin/sales.jsx";
+import categories from "./admin/categories.jsx";
 
 function Dynamic() {
   const { route } = useParams();
@@ -14,6 +15,7 @@ function Dynamic() {
     orders: Order,
     products: Product,
     sales: sales,
+    categories: categories,
    
   };
 

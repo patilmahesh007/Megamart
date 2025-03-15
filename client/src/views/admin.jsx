@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from "react-hot-toast";
 import {
   Users,
@@ -7,7 +7,6 @@ import {
   Package,
   BarChart,
   Tag,
-  Star,
   Bell,
 } from "lucide-react";
 import verifyRole from "../util/verifyRole.util.js";
@@ -85,24 +84,14 @@ function AdminPanel() {
       route: "/admin/sales",
     },
     {
-      title: "Coupons",
-      description: "Create and manage discount codes",
+      title: "Categories",
+      description: "Manage product categories",
       icon: <Tag size={24} />,
       color: "bg-teal-500",
       hoverColor: "hover:bg-teal-600",
-      buttonText: "Manage Coupons",
-      count: "18",
-      route: "/admin/coupons",
-    },
-    {
-      title: "Reviews",
-      description: "Moderate product reviews & ratings",
-      icon: <Star size={24} />,
-      color: "bg-teal-500",
-      hoverColor: "hover:bg-teal-600",
-      buttonText: "Manage Reviews",
-      count: "352",
-      route: "/admin/reviews",
+      buttonText: "Manage Categories",
+      count: "42",
+      route: "/admin/categories",
     },
     {
       title: "Notifications",

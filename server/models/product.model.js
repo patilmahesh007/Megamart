@@ -18,6 +18,20 @@ const ProductSchema = new mongoose.Schema({
   bestSeller: { type: Boolean, default: false },
   isFeatured: { type: Boolean, default: false },
   isTrending: { type: Boolean, default: false },
+
+  brand: { type: String },
+  dietaryPreference: { type: String },
+  allergenInformation: { type: String },
+  servingSize: { type: String },
+  disclaimer: { type: String },
+  customerCareDetails: { type: String },
+  sellerName: { type: String },
+  sellerAddress: { type: String },
+  sellerLicenseNo: { type: String },
+  manufacturerName: { type: String },
+  manufacturerAddress: { type: String },
+  countryOfOrigin: { type: String },
+  shelfLife: { type: String } 
 }, {
   timestamps: true,
 });

@@ -17,7 +17,18 @@ const OrderSchema = new mongoose.Schema({
     zipCode: { type: String },
     country: { type: String },
   },
-  status: { type: String, enum: ['pending', 'shipped', 'delivered', 'cancelled'], default: 'pending' },
+  status: { 
+    type: String, 
+    enum: ['pending', 'shipped', 'delivered', 'cancelled'], 
+    default: 'pending' 
+  },
+  paymentStatus: { 
+    type: String, 
+    enum: ['pending', 'paid', 'failed'], 
+    default: 'pending' 
+  },
+  trackingNumber: { type: String },
+  notes: { type: String },
 }, {
   timestamps: true,
 });

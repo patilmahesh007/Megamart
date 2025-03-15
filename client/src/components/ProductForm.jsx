@@ -10,9 +10,37 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
     originalPrice: "",
     category: "",
     stock: "",
+    brand: "",
+    dietaryPreference: "",
+    allergenInformation: "",
+    servingSize: "",
+    disclaimer: "",
+    customerCareDetails: "",
+    sellerName: "",
+    sellerAddress: "",
+    sellerLicenseNo: "",
+    manufacturerName: "",
+    manufacturerAddress: "",
+    countryOfOrigin: "",
+    shelfLife: ""
   });
   const [mainImage, setMainImage] = useState(null);
   const [images, setImages] = useState([]);
+  const [categories, setCategories] = useState([]);
+
+  // Fetch categories for the dropdown
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get("/category/list");
+        setCategories(res.data.data || []);
+      } catch (error) {
+        toast.error("Failed to fetch categories");
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (editingProduct) {
@@ -23,6 +51,19 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
         originalPrice: editingProduct.originalPrice,
         category: editingProduct.category?._id || editingProduct.category || "",
         stock: editingProduct.stock,
+        brand: editingProduct.brand || "",
+        dietaryPreference: editingProduct.dietaryPreference || "",
+        allergenInformation: editingProduct.allergenInformation || "",
+        servingSize: editingProduct.servingSize || "",
+        disclaimer: editingProduct.disclaimer || "",
+        customerCareDetails: editingProduct.customerCareDetails || "",
+        sellerName: editingProduct.sellerName || "",
+        sellerAddress: editingProduct.sellerAddress || "",
+        sellerLicenseNo: editingProduct.sellerLicenseNo || "",
+        manufacturerName: editingProduct.manufacturerName || "",
+        manufacturerAddress: editingProduct.manufacturerAddress || "",
+        countryOfOrigin: editingProduct.countryOfOrigin || "",
+        shelfLife: editingProduct.shelfLife || ""
       });
     } else {
       setFormData({
@@ -32,6 +73,19 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
         originalPrice: "",
         category: "",
         stock: "",
+        brand: "",
+        dietaryPreference: "",
+        allergenInformation: "",
+        servingSize: "",
+        disclaimer: "",
+        customerCareDetails: "",
+        sellerName: "",
+        sellerAddress: "",
+        sellerLicenseNo: "",
+        manufacturerName: "",
+        manufacturerAddress: "",
+        countryOfOrigin: "",
+        shelfLife: ""
       });
       setMainImage(null);
       setImages([]);
@@ -73,6 +127,7 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
         toast.success("Product added successfully");
       }
       onSuccess && onSuccess();
+      // Reset the form fields after success
       setFormData({
         name: "",
         description: "",
@@ -80,6 +135,19 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
         originalPrice: "",
         category: "",
         stock: "",
+        brand: "",
+        dietaryPreference: "",
+        allergenInformation: "",
+        servingSize: "",
+        disclaimer: "",
+        customerCareDetails: "",
+        sellerName: "",
+        sellerAddress: "",
+        sellerLicenseNo: "",
+        manufacturerName: "",
+        manufacturerAddress: "",
+        countryOfOrigin: "",
+        shelfLife: ""
       });
       setMainImage(null);
       setImages([]);
@@ -96,6 +164,19 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
       originalPrice: "",
       category: "",
       stock: "",
+      brand: "",
+      dietaryPreference: "",
+      allergenInformation: "",
+      servingSize: "",
+      disclaimer: "",
+      customerCareDetails: "",
+      sellerName: "",
+      sellerAddress: "",
+      sellerLicenseNo: "",
+      manufacturerName: "",
+      manufacturerAddress: "",
+      countryOfOrigin: "",
+      shelfLife: ""
     });
     setMainImage(null);
     setImages([]);
@@ -108,6 +189,7 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
         {editingProduct ? 'Edit Product' : 'Add New Product'}
       </h3>
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Product Name and Category */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-gray-300 mb-1">Product Name</label>
@@ -122,17 +204,23 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
           </div>
           <div>
             <label className="block text-gray-300 mb-1">Category</label>
-            <input
-              type="text"
+            <select
               name="category"
               value={formData.category}
               onChange={handleInputChange}
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
               required
-            />
+            >
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
-        
+        {/* Description */}
         <div>
           <label className="block text-gray-300 mb-1">Description</label>
           <textarea
@@ -143,7 +231,7 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
             required
           ></textarea>
         </div>
-
+        {/* Pricing and Stock */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-gray-300 mb-1">Current Price</label>
@@ -179,39 +267,191 @@ const ProductForm = ({ editingProduct, onSuccess, onCancel }) => {
             />
           </div>
         </div>
-
+        {/* Additional Product Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-gray-300 mb-1">Main Image</label>
+            <label className="block text-gray-300 mb-1">Brand</label>
             <input
-              type="file"
-              accept="image/*"
-              onChange={handleMainImageChange}
+              type="text"
+              name="brand"
+              value={formData.brand}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
-              required={!editingProduct}
             />
           </div>
           <div>
-            <label className="block text-gray-300 mb-1">Additional Images</label>
+            <label className="block text-gray-300 mb-1">Dietary Preference</label>
             <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImagesChange}
+              type="text"
+              name="dietaryPreference"
+              value={formData.dietaryPreference}
+              onChange={handleInputChange}
               className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
             />
           </div>
         </div>
-
+        <div>
+          <label className="block text-gray-300 mb-1">Allergen Information</label>
+          <textarea
+            name="allergenInformation"
+            value={formData.allergenInformation}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white h-20"
+          ></textarea>
+        </div>
+        <div>
+          <label className="block text-gray-300 mb-1">Serving Size</label>
+          <input
+            type="text"
+            name="servingSize"
+            value={formData.servingSize}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+          />
+        </div>
+        {/* Extra Information */}
+        <div>
+          <label className="block text-gray-300 mb-1">Disclaimer</label>
+          <textarea
+            name="disclaimer"
+            value={formData.disclaimer}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white h-20"
+          ></textarea>
+        </div>
+        <div>
+          <label className="block text-gray-300 mb-1">Customer Care Details</label>
+          <textarea
+            name="customerCareDetails"
+            value={formData.customerCareDetails}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white h-20"
+          ></textarea>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-gray-300 mb-1">Seller Name</label>
+            <input
+              type="text"
+              name="sellerName"
+              value={formData.sellerName}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-300 mb-1">Seller Address</label>
+            <input
+              type="text"
+              name="sellerAddress"
+              value={formData.sellerAddress}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-gray-300 mb-1">Seller License No.</label>
+          <input
+            type="text"
+            name="sellerLicenseNo"
+            value={formData.sellerLicenseNo}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+          />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-gray-300 mb-1">Manufacturer Name</label>
+            <input
+              type="text"
+              name="manufacturerName"
+              value={formData.manufacturerName}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-300 mb-1">Manufacturer Address</label>
+            <input
+              type="text"
+              name="manufacturerAddress"
+              value={formData.manufacturerAddress}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-gray-300 mb-1">Country of Origin</label>
+            <input
+              type="text"
+              name="countryOfOrigin"
+              value={formData.countryOfOrigin}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+            />
+          </div>
+          <div>
+            <label className="block text-gray-300 mb-1">Shelf Life</label>
+            <input
+              type="text"
+              name="shelfLife"
+              value={formData.shelfLife}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+            />
+          </div>
+        </div>
+        {/* Custom File Inputs */}
+        <div>
+          <label className="block text-gray-300 mb-1">Main Image</label>
+          <div className="flex items-center">
+            <label htmlFor="mainImage" className="cursor-pointer bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md text-white">
+              Choose File
+            </label>
+            <span className="ml-4 text-gray-400">
+              {mainImage ? mainImage.name : "No file chosen"}
+            </span>
+          </div>
+          <input
+            id="mainImage"
+            type="file"
+            accept="image/*"
+            onChange={handleMainImageChange}
+            className="hidden"
+            required={!editingProduct}
+          />
+        </div>
+        <div>
+          <label className="block text-gray-300 mb-1">Additional Images</label>
+          <div className="flex items-center">
+            <label htmlFor="additionalImages" className="cursor-pointer bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md text-white">
+              Choose Files
+            </label>
+            <span className="ml-4 text-gray-400">
+              {images.length > 0 ? `${images.length} file(s) chosen` : "No file chosen"}
+            </span>
+          </div>
+          <input
+            id="additionalImages"
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImagesChange}
+            className="hidden"
+          />
+        </div>
         <div className="flex space-x-3">
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md"
           >
             {editingProduct ? 'Update Product' : 'Add Product'}
           </button>
-          <button 
-            type="button" 
+          <button
+            type="button"
             onClick={resetForm}
             className="bg-slate-600 hover:bg-slate-700 px-4 py-2 rounded-md"
           >

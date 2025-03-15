@@ -7,7 +7,27 @@ export const addProduct = async (req, res) => {
   }
 
   try {
-    const { name, description, currentPrice, originalPrice, category, stock } = req.body;
+    const { 
+      name, 
+      description, 
+      currentPrice, 
+      originalPrice, 
+      category, 
+      stock,
+      brand,
+      dietaryPreference,
+      allergenInformation,
+      servingSize,
+      disclaimer,
+      customerCareDetails,
+      sellerName,
+      sellerAddress,
+      sellerLicenseNo,
+      manufacturerName,
+      manufacturerAddress,
+      countryOfOrigin,
+      shelfLife
+    } = req.body;
 
     if (!name || !description || currentPrice == null || originalPrice == null || !category || stock == null) {
       return errorResponse(res, "All fields are required", 400);
@@ -35,9 +55,22 @@ export const addProduct = async (req, res) => {
       currentPrice,
       originalPrice,
       category,
+      stock,
       mainImage: mainImageUrl,
       images: imagesUrls,
-      stock,
+      brand,
+      dietaryPreference,
+      allergenInformation,
+      servingSize,
+      disclaimer,
+      customerCareDetails,
+      sellerName,
+      sellerAddress,
+      sellerLicenseNo,
+      manufacturerName,
+      manufacturerAddress,
+      countryOfOrigin,
+      shelfLife,
     });
 
     await product.save();
@@ -63,11 +96,17 @@ export const getProductById = async (req, res) => {
 };
 
 export const updateProduct = async (req, res) => {
-
-  
   try {
     const { id } = req.params;
-    const updates = req.body;
+    let updates = { ...req.body };
+
+    if (req.files && req.files.mainImage && req.files.mainImage.length > 0) {
+      updates.mainImage = req.files.mainImage[0].path;
+    }
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      updates.images = req.files.images.map(file => file.path);
+    }
+
     const product = await Product.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
     if (!product) {
       return errorResponse(res, "Product not found", 404);

@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import User from "./admin/user.jsx";
 import Order from "./admin/order.jsx";
 import Product from "./admin/product.jsx";
+import sales from "./admin/sales.jsx";
 
 function Dynamic() {
   const { route } = useParams();
@@ -12,6 +13,7 @@ function Dynamic() {
     users: User,
     orders: Order,
     products: Product,
+    sales: sales,
    
   };
 

@@ -82,7 +82,7 @@ function AdminPanel() {
       hoverColor: "hover:bg-teal-600",
       buttonText: "View Reports",
       count: "43",
-      route: "/admin/reports",
+      route: "/admin/sales",
     },
     {
       title: "Coupons",

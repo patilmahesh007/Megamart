@@ -47,27 +47,30 @@ export const getOtp = async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch OTP." });
   }
 };
- export const verifyOtp = async (req, res) => {
+export const verifyOtp = async (req, res) => {
   try {
     const { phone, otp } = req.body;
     if (!phone || !otp) {
       return res.status(400).json({ error: "Phone number and OTP are required." });
     }
+
     const user = await User.findOne({ phone });
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
+
     if (user.otpExpiresAt < Date.now()) {
       return res.status(400).json({ error: "OTP expired. Please request a new one." });
     }
+
     const isMatch = await bcrypt.compare(otp, user.otp);
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid OTP. Please try again." });
     }
 
-    // Generate JWT token with _id and name stored in the payload
+    // Generate JWT token with user ID, name, and role
     const token = jwt.sign(
-      { _id: user._id, name: user.name },
+      { _id: user._id, name: user.name, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -75,26 +78,27 @@ export const getOtp = async (req, res) => {
     // Set cookie with the generated token
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // use secure flag in production
-      sameSite: "None",
+      secure: process.env.NODE_ENV === "production", // Secure in production
+      sameSite: "Lax",
     });
-    
-    if (req.session) {
-      req.session.token = token;
-    }
 
     user.isVerified = true;
-    await user.clearOtp();
+    await user.clearOtp(); // Ensure OTP is cleared after verification
 
-    return res.json({ message: "OTP verified successfully. User logged in.", token });
+    return res.json({ 
+      message: "OTP verified successfully. User logged in.", 
+      token, 
+      role: user.role // Return the role along with the token
+    });
+
   } catch (error) {
     console.error("Error verifying OTP:", error);
     return res.status(500).json({ error: "OTP verification failed." });
   }
 };
+
 export const verifyRole = async (req, res) => {
   try {
-    console.log(req);
     let token = req.headers.authorization?.split(" ")[1] || req.body.token;
 
     if (!token) {

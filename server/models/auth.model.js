@@ -19,6 +19,8 @@ const UserSchema = new mongoose.Schema({
   otpExpiresAt: { type: Date },
   isVerified: { type: Boolean, default: false },
   addresses: [AddressSchema],
+  lastLogin: { type: Date, default: Date.now }
+  ,
   role: {
     type: String,
     enum: ['customer', 'admin', 'superadmin'],

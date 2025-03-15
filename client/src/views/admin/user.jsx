@@ -11,7 +11,7 @@ import {
   CheckCircle, 
   XCircle 
 } from 'lucide-react';
-
+import LoginGraph  from "../../components/LoginGraph.jsx"
 function UserList() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,6 @@ function UserList() {
   const fetchUsers = async () => {
     try {
       const res = await api.get('/users');
-      console.log("Fetched data:", res.data);
       setUsers(res.data.data.users);
       setLoading(false);
     } catch (error) {
@@ -36,11 +35,9 @@ function UserList() {
 
   const handleDisableUser = async (userId) => {
     try {
-      const token = localStorage.getItem("token");
       await api.patch(
         `/users/${userId}/disable`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("User disabled successfully");
       setUsers(prevUsers =>
@@ -57,11 +54,8 @@ function UserList() {
 
   const handleEnableUser = async (userId) => {
     try {
-      const token = localStorage.getItem("token");
       await api.patch(
         `/users/${userId}/enable`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("User enabled successfully");
       setUsers(prevUsers =>
@@ -93,6 +87,8 @@ function UserList() {
 
   return (
     <div className="p-6 bg-gradient-to-br from-black via-gray-900 to-black min-h-screen">
+          <LoginGraph />
+
       <h1 className="text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-aquamarine to-teal-300">
         User Dashboard
       </h1>

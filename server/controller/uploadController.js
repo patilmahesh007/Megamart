@@ -3,7 +3,6 @@ import Product from "../models/product.model.js";
 import { successResponse, errorResponse } from "../utils/responder.util.js";
 
 export const uploadPhotoController = async (req, res) => {
-  console.log("Request Body:", req.body);
 
   try {
     const { userId, type, productId } = req.body;

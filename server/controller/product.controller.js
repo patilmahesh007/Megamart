@@ -63,9 +63,7 @@ export const getProductById = async (req, res) => {
 };
 
 export const updateProduct = async (req, res) => {
-  if (!req.user || req.user.role !== "admin") {
-    return errorResponse(res, "Unauthorized", 403);
-  }
+
   
   try {
     const { id } = req.params;

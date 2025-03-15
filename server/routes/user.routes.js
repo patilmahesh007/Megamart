@@ -7,7 +7,12 @@ import {
   enableUser 
 } from '../controller/user.controller.js';
 
+
+import { getLoginStats } from '../controller/loginStats.controller.js';
+
+
 const router = express.Router();
+router.get('/login-stats', getLoginStats);
 
 router.get('/', getUsers);
 router.get('/:id', getUserById);

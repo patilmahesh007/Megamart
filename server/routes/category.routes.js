@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post("/add", upload.fields([
     { name: "categoryImg", maxCount: 1 },
-]), addCategory);
+]),  addCategory);
 router.get("/list", getCategories);
 
-export default router;
+export default router;  

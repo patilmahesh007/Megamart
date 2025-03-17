@@ -1,4 +1,3 @@
-// utils/upload.js
 import pkg from "cloudinary";
 const { v2: cloudinary } = pkg;
 import { CloudinaryStorage } from "multer-storage-cloudinary";
@@ -13,7 +12,7 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'profile_photos', // Adjust folder name as needed
+    folder: 'profile_photos', 
     allowed_formats: ['jpg', 'jpeg', 'png'],
   },
 });

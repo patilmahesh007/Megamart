@@ -9,43 +9,43 @@ const ProductCard = ({ product, onDelete }) => {
   const navigate = useNavigate();
 
   return (
-    <div
-      className="relative bg-white rounded-lg shadow-lg overflow-hidden cursor-pointer transform hover:scale-105 transition duration-300"
+    <div 
+      className="group relative bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
       onClick={() => navigate(`/admin/products/${product._id}`)}
     >
       <div className="relative">
-        <img
-          src={product.mainImage}
-          alt={product.name}
-          className="w-full h-56 object-cover"
-        />
-        <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 transition duration-300 flex flex-col justify-end p-4">
-          <h3 className="text-xl font-bold text-white">{product.name}</h3>
-          <p className="text-sm text-gray-300">
-            {product.category?.name || product.category}
-          </p>
-          <div className="mt-1 flex items-center space-x-2">
-            <span className="text-lg font-semibold text-green-400">
-              ${product.currentPrice}
-            </span>
-            {product.originalPrice && (
-              <span className="text-sm text-gray-300 line-through">
-                ${product.originalPrice}
-              </span>
+        {product.mainImage ? (
+          <img 
+            src={product.mainImage} 
+            alt={product.name}
+            className="h-48 object-cover object-center mx-auto"
+            />
+        ) : (
+          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-500">No Image</span>
+          </div>
+        )}
+        <div className="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <h3 className="text-lg font-semibold text-white truncate">{product.name}</h3>
+          <p className="text-xs text-gray-300">{product.category?.name || product.category || "Uncategorized"}</p>
+          <div className="mt-1 flex items-center">
+            <span className="text-lg font-bold text-green-400">₹{product.currentPrice}</span>
+            {product.originalPrice && product.originalPrice > product.currentPrice && (
+              <span className="ml-2 text-xs text-gray-300 line-through">₹{product.originalPrice}</span>
             )}
           </div>
         </div>
       </div>
       <div className="p-4">
-        <p className="text-sm text-gray-700 truncate">{product.description}</p>
+        <p className="text-xs text-gray-600 line-clamp-2">{product.description}</p>
         <div className="mt-3 flex justify-between items-center">
-          <span className="text-sm text-gray-600">Stock: {product.stock}</span>
-          <button
+          <span className="text-xs text-gray-500">Stock: {product.stock}</span>
+          <button 
             onClick={(e) => {
               e.stopPropagation();
               onDelete(product._id);
             }}
-            className="bg-red-600 hover:bg-red-700 p-2 rounded-full"
+            className="bg-red-600 hover:bg-red-700 p-2 rounded-full transition-colors duration-200"
           >
             <Trash2 size={16} className="text-white" />
           </button>
@@ -81,7 +81,7 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
       try {
-        await api.delete(`/products/delete/${id}`);
+        await api.delete(`/product/delete/${id}`);
         toast.success("Product deleted successfully");
         fetchProducts();
       } catch (error) {

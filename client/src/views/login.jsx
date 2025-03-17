@@ -78,13 +78,12 @@ const OTPVerification = () => {
         phone: mobileNumber,
         otp: otpString,
       });
-      // Store the token in localStorage under the key "token"
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
       toast.success(data.messages || "OTP verified successfully");
       setTimeout(() => {
-        navigate("/dashboard");
+        navigate("/AdminPanel");
       }, 1000);
     } catch (err) {
       toast.error(err.response?.data?.messages || "Error verifying OTP, please try again");

@@ -2,17 +2,13 @@ import Category from "../models/category.model.js";
 import { successResponse, errorResponse } from "../utils/responder.util.js";
 
 export const addCategory = async (req, res) => {
-  if (!req.user || req.user.role !== "admin") {
-    return errorResponse(res, "Unauthorized", 403);
-  }
-
   try {
-    const { name, description } = req.body;
+    const { name, description, parent } = req.body;
     if (!name) {
       return errorResponse(res, "Category name is required", 400);
     }
     
-    if (!req.files || !req.files.image || req.files.image.length === 0) {
+    if (!req.files || !req.files.categoryImg || req.files.categoryImg.length === 0) {
       return errorResponse(res, "Category image is required", 400);
     }
     
@@ -21,15 +17,13 @@ export const addCategory = async (req, res) => {
       return errorResponse(res, "Category already exists", 400);
     }
     
-    const imageFilePath = req.files.image[0].path;
-    const uploadResult = await cloudinary.uploader.upload(imageFilePath, {
-      folder: "categories",
-    });
+    const imageUrl = req.files.categoryImg[0].path;
     
     const category = await Category.create({ 
       name, 
       description,
-      image: uploadResult.secure_url 
+      categoryImg: imageUrl,
+      parent: parent || null  
     });
     
     return successResponse(res, "Category added successfully", category, 201);
@@ -41,7 +35,7 @@ export const addCategory = async (req, res) => {
 
 export const getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({});
+    const categories = await Category.find({}).populate("subCategories");
     return successResponse(res, "Categories retrieved successfully", categories);
   } catch (error) {
     console.error("Error retrieving categories:", error);
@@ -50,10 +44,6 @@ export const getCategories = async (req, res) => {
 };
 
 export const deleteCategory = async (req, res) => {
-  if (!req.user || req.user.role !== "admin") {
-    return errorResponse(res, "Unauthorized", 403);
-  }
-
   try {
     const { id } = req.params;
     const category = await Category.findByIdAndDelete(id);

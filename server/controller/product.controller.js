@@ -2,10 +2,6 @@ import Product from "../models/product.model.js";
 import { successResponse, errorResponse } from "../utils/responder.util.js";
 
 export const addProduct = async (req, res) => {
-  if (!req.user || req.user.role !== "admin") {
-    return errorResponse(res, "Unauthorized", 403);
-  }
-
   try {
     const { 
       name, 
@@ -100,6 +96,10 @@ export const updateProduct = async (req, res) => {
     const { id } = req.params;
     let updates = { ...req.body };
 
+    if (updates.category === "") {
+      delete updates.category;
+    }
+
     if (req.files && req.files.mainImage && req.files.mainImage.length > 0) {
       updates.mainImage = req.files.mainImage[0].path;
     }
@@ -119,10 +119,6 @@ export const updateProduct = async (req, res) => {
 };
 
 export const deleteProduct = async (req, res) => {
-  if (!req.user || req.user.role !== "admin") {
-    return errorResponse(res, "Unauthorized", 403);
-  }
-  
   try {
     const { id } = req.params;
     const product = await Product.findByIdAndDelete(id);

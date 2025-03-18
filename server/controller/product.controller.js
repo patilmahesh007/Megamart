@@ -25,7 +25,7 @@ export const addProduct = async (req, res) => {
       shelfLife
     } = req.body;
 
-    if (!name || !description || currentPrice == null || originalPrice == null || !category || stock == null) {
+    if (!name || !description || currentPrice == null || originalPrice == null || !category || stock == null || !servingSize) {
       return errorResponse(res, "All fields are required", 400);
     }
     if (isNaN(currentPrice) || isNaN(originalPrice) || isNaN(stock)) {
@@ -149,6 +149,46 @@ export const listProductsByCategory = async (req, res) => {
     return successResponse(res, "Products fetched successfully", products, 200);
   } catch (error) {
     console.error("Error listing products by category:", error);
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+export const getTrendingProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isTrending: true }).populate("category");
+    return successResponse(res, "Trending products fetched successfully", products, 200);
+  } catch (error) {
+    console.error("Error fetching trending products:", error);
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+export const getFeaturedProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isFeatured: true }).populate("category");
+    return successResponse(res, "Featured products fetched successfully", products, 200);
+  } catch (error) {
+    console.error("Error fetching featured products:", error);
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+export const getBestSellerProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ bestSeller: true }).populate("category");
+    return successResponse(res, "Best seller products fetched successfully", products, 200);
+  } catch (error) {
+    console.error("Error fetching best seller products:", error);
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+export const getMembershipProducts = async (req, res) => {
+  try {
+    const products = await Product.find({ isMembership: true }).populate("category");
+    return successResponse(res, "Membership products fetched successfully", products, 200);
+  } catch (error) {
+    console.error("Error fetching membership products:", error);
     return errorResponse(res, error.message, 500);
   }
 };

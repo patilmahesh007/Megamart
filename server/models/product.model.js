@@ -22,7 +22,11 @@ const ProductSchema = new mongoose.Schema({
   brand: { type: String },
   dietaryPreference: { type: String },
   allergenInformation: { type: String },
-  servingSize: { type: String },
+  servingSize: { 
+    type: String, 
+    enum: ["Per Piece", "100g", "250g", "500g", "1kg", "2kg", "5kg"], 
+    required: true 
+  },
   disclaimer: { type: String },
   customerCareDetails: { type: String },
   sellerName: { type: String },

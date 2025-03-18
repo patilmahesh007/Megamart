@@ -3,9 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from "../util/api.util.js";
 import { toast } from "react-hot-toast";
 
+const servingSizes = ["Per Piece", "100g", "250g", "500g", "1kg", "2kg", "5kg"];
+
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const isEditing = Boolean(id);
   const [activeTab, setActiveTab] = useState('basic');
   const [formData, setFormData] = useState({
     name: "",
@@ -30,12 +33,12 @@ const ProductDetailPage = () => {
   });
   const [mainImage, setMainImage] = useState(null);
   const [images, setImages] = useState([]);
-  const [existingProduct, setExistingProduct] = useState(null);
   const [displayedMainImage, setDisplayedMainImage] = useState("");
   const [categories, setCategories] = useState([]);
+  const [existingProduct, setExistingProduct] = useState(null);
 
   useEffect(() => {
-    if (id) {
+    if (isEditing) {
       const fetchProductDetail = async () => {
         try {
           const res = await api.get(`/product/get/${id}`);
@@ -69,7 +72,7 @@ const ProductDetailPage = () => {
       };
       fetchProductDetail();
     }
-  }, [id]);
+  }, [id, isEditing]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -103,7 +106,7 @@ const ProductDetailPage = () => {
     if (mainImage) data.append("mainImage", mainImage);
     images.forEach(file => data.append("images", file));
     try {
-      if (id) {
+      if (isEditing) {
         await api.put(`/products/update/${id}`, data);
         toast.success("Product updated successfully");
       } else {
@@ -156,7 +159,7 @@ const ProductDetailPage = () => {
     <div className="bg-slate-800 rounded-lg shadow-lg overflow-hidden">
       <div className="border-b border-slate-700 px-6 py-4 flex items-center justify-between">
         <h3 className="text-xl font-semibold text-white flex items-center">
-          {id ? (
+          {isEditing ? (
             <>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -247,22 +250,33 @@ const ProductDetailPage = () => {
                 <input type="text" name="dietaryPreference" value={formData.dietaryPreference} onChange={handleInputChange} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-teal-500" />
               </div>
             </div>
-            
+  
             <div className="mb-4">
               <label className="block text-gray-300 text-sm font-medium mb-1">Allergen Information</label>
               <textarea name="allergenInformation" value={formData.allergenInformation} onChange={handleInputChange} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white h-20 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
             </div>
-            
+  
             <div className="mb-4">
               <label className="block text-gray-300 text-sm font-medium mb-1">Serving Size</label>
-              <input type="text" name="servingSize" value={formData.servingSize} onChange={handleInputChange} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-teal-500" required />
+              <select 
+                name="servingSize"
+                value={formData.servingSize}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-teal-500 h-10 overflow-y-auto"
+                required
+              >
+                <option value="">Select Serving Size</option>
+                {servingSizes.map((size, index) => (
+                  <option key={index} value={size}>{size}</option>
+                ))}
+              </select>
             </div>
-            
+  
             <div className="mb-4">
               <label className="block text-gray-300 text-sm font-medium mb-1">Disclaimer</label>
               <textarea name="disclaimer" value={formData.disclaimer} onChange={handleInputChange} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white h-20 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
             </div>
-            
+  
             <div className="mb-4">
               <label className="block text-gray-300 text-sm font-medium mb-1">Customer Care Details</label>
               <textarea name="customerCareDetails" value={formData.customerCareDetails} onChange={handleInputChange} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white h-20 focus:outline-none focus:ring-2 focus:ring-teal-500"></textarea>
@@ -321,7 +335,7 @@ const ProductDetailPage = () => {
                 </label>
                 <span className="ml-4 text-gray-400 text-sm">{mainImage ? mainImage.name : "No file chosen"}</span>
               </div>
-              <input id="mainImage" type="file" accept="image/*" onChange={handleMainImageChange} className="hidden" required={!existingProduct} />
+              <input id="mainImage" type="file" accept="image/*" onChange={handleMainImageChange} className="hidden" required={!isEditing} />
             </div>
   
             <div>
@@ -351,7 +365,7 @@ const ProductDetailPage = () => {
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              {existingProduct ? 'Update Product' : 'Save Product'}
+              {isEditing ? 'Update Product' : 'Save Product'}
             </button>
           </div>
         </div>

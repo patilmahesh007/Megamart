@@ -111,9 +111,7 @@ const AdminDashboard = () => {
               />
               <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
             </div>
-            <button className="p-2 rounded-full bg-slate-700 hover:bg-slate-600">
-              <Settings size={20} />
-            </button>
+     
           </div>
         </div>
       </header>

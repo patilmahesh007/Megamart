@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import api from "../../util/api.util.js";
+import { Link } from 'react-router-dom';
+import api from './../util/api.util';
 
 const SubCategoryPage = () => {
   const [products, setProducts] = useState([]);
@@ -46,21 +47,25 @@ const SubCategoryPage = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           {products.map((product) => (
-            <div
+            <Link 
               key={product._id}
-              className="bg-white rounded-lg shadow p-4 flex flex-col"
+              to={`/product/${product._id}`}
+              className="bg-white rounded-lg shadow p-4 flex flex-col hover:shadow-lg transition"
             >
               <img
                 src={product.mainImage || "https://via.placeholder.com/150"}
                 alt={product.name}
-                className="h-40 object-cover rounded mb-4" // only height fixed; width determined naturally
+                className="h-40 object-cover rounded mb-4"  
               />
               <h3 className="text-lg font-semibold mb-2">{product.name}</h3>
               <p className="text-gray-600 mb-2">${(product.currentPrice ?? 0).toFixed(2)}</p>
-              <button className="mt-auto bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition">
+              <button 
+                className="mt-auto bg-purple-600 text-white py-2 rounded hover:bg-purple-700 transition"
+                onClick={(e) => e.preventDefault()}
+              >
                 Buy Now
               </button>
-            </div>
+            </Link>
           ))}
         </div>
       )}

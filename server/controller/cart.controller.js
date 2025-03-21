@@ -1,10 +1,11 @@
 import Cart from "../models/cart.model.js";
 import { successResponse, errorResponse } from "../utils/responder.util.js";
+import getRequestingUser from "../utils/getid.util.js";
 
 export const getCart = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const cart = await Cart.findOne({ user: userId }).populate("items.product");
+    const requestingUser = await getRequestingUser(req);
+    const cart = await Cart.findOne({ user: requestingUser._id }).populate("items.product");
     if (!cart) {
       return errorResponse(res, "Cart not found", 404);
     }
@@ -17,13 +18,14 @@ export const getCart = async (req, res) => {
 
 export const addToCart = async (req, res) => {
   try {
-    const { userId, product, quantity } = req.body;
-    if (!userId || !product || !quantity) {
-      return errorResponse(res, "User, product, and quantity are required", 400);
+    const requestingUser = await getRequestingUser(req);
+    const { product, quantity } = req.body;
+    if (!product || !quantity) {
+      return errorResponse(res, "Product and quantity are required", 400);
     }
-    let cart = await Cart.findOne({ user: userId });
+    let cart = await Cart.findOne({ user: requestingUser._id });
     if (!cart) {
-      cart = new Cart({ user: userId, items: [{ product, quantity }] });
+      cart = new Cart({ user: requestingUser._id, items: [{ product, quantity }] });
     } else {
       const itemIndex = cart.items.findIndex(item => item.product.toString() === product);
       if (itemIndex > -1) {
@@ -42,11 +44,12 @@ export const addToCart = async (req, res) => {
 
 export const removeFromCart = async (req, res) => {
   try {
-    const { userId, product } = req.body;
-    if (!userId || !product) {
-      return errorResponse(res, "User and product are required", 400);
+    const requestingUser = await getRequestingUser(req);
+    const { product } = req.body;
+    if (!product) {
+      return errorResponse(res, "Product is required", 400);
     }
-    let cart = await Cart.findOne({ user: userId });
+    let cart = await Cart.findOne({ user: requestingUser._id });
     if (!cart) {
       return errorResponse(res, "Cart not found", 404);
     }

@@ -62,7 +62,7 @@ const AdminDashboard = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await api.get("/product/list");
+      const res = await api.get("/product");
       setProducts(res.data.data || []);
     } catch (error) {
       console.error("Error fetching products:", error);

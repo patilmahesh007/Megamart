@@ -12,7 +12,7 @@ import upload from "../utils/upload.js";
 const productRouter = express.Router();
 
 productRouter.post(
-  "/add",
+  "/",
   upload.fields([
     { name: "mainImage", maxCount: 1 },
     { name: "images", maxCount: 5 }
@@ -20,16 +20,21 @@ productRouter.post(
   addProduct
 );
 
-productRouter.get("/list", listProducts);
+productRouter.get("/", listProducts);
+
 productRouter.get("/get/:id", getProductById);
-productRouter.put('/update/:id', upload.fields([
-  { name: 'mainImage', maxCount: 1 },
-  { name: 'images', maxCount: 10 }
-]), updateProduct);
 
+productRouter.put(
+  "/update/:id",
+  upload.fields([
+    { name: "mainImage", maxCount: 1 },
+    { name: "images", maxCount: 10 }
+  ]),
+  updateProduct
+);
 
+productRouter.delete("/:id", deleteProduct);
 
-productRouter.delete("/delete/:id", deleteProduct);
-productRouter.get("/list/category/:id", listProductsByCategory);
+productRouter.get("/category/:id", listProductsByCategory);
 
 export default productRouter;

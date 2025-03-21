@@ -1,11 +1,14 @@
+// src/ProductDetailPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import api from "../../util/api.util.js";
-import { toast } from "react-hot-toast";
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Share, ShoppingCart, Heart, ChevronRight } from 'lucide-react';
+import api from '../../util/api.util.js';
+import { toast } from 'react-hot-toast';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -79,6 +82,7 @@ const ProductDetailPage = () => {
     };
     fetchCategories();
   }, []);
+  
   useEffect(() => {
     console.log("Product ID:", id);
   }, [id]);
@@ -137,7 +141,7 @@ const ProductDetailPage = () => {
     });
     setMainImage(null);
     setImages([]);
-    onCancel && onCancel();
+    // Optionally reset further state or call a callback if provided
   };
 
   return (
@@ -150,7 +154,14 @@ const ProductDetailPage = () => {
             <img src={displayedMainImage} alt={existingProduct.name} className="w-full h-64 object-cover rounded" />
             <div className="mt-4 grid grid-cols-3 gap-2">
               {existingProduct.images && existingProduct.images.map((img, idx) => (
-                <img key={idx} src={img} alt={`Additional ${idx}`} className="w-full h-24 object-cover rounded cursor-pointer" onMouseEnter={() => setDisplayedMainImage(img)} onMouseLeave={() => setDisplayedMainImage(existingProduct.mainImage)} />
+                <img
+                  key={idx}
+                  src={img}
+                  alt={`Additional ${idx}`}
+                  className="w-full h-24 object-cover rounded cursor-pointer"
+                  onMouseEnter={() => setDisplayedMainImage(img)}
+                  onMouseLeave={() => setDisplayedMainImage(existingProduct.mainImage)}
+                />
               ))}
             </div>
           </div>
@@ -208,9 +219,25 @@ const ProductDetailPage = () => {
                 <label className="block mb-1">Allergen Information</label>
                 <textarea name="allergenInformation" value={formData.allergenInformation} onChange={handleInputChange} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white h-20"></textarea>
               </div>
+              {/* Serving Size select dropdown updated to use enum values */}
               <div>
                 <label className="block mb-1">Serving Size</label>
-                <input type="text" name="servingSize" value={formData.servingSize} onChange={handleInputChange} className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white" />
+                <select
+                  name="servingSize"
+                  value={formData.servingSize}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-md text-white"
+                  required
+                >
+                  <option value="">Select serving size</option>
+                  <option value="Per Piece">Per Piece</option>
+                  <option value="100g">100g</option>
+                  <option value="250g">250g</option>
+                  <option value="500g">500g</option>
+                  <option value="1kg">1kg</option>
+                  <option value="2kg">2kg</option>
+                  <option value="5kg">5kg</option>
+                </select>
               </div>
               <div>
                 <label className="block mb-1">Disclaimer</label>

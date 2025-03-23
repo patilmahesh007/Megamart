@@ -1,10 +1,11 @@
 import express from "express";
-import { getCart, addToCart, removeFromCart } from "../controller/cart.controller.js";
+import { getCart, addToCart, removeFromCart ,updateCart} from "../controller/cart.controller.js";
 
 const cartRouter = express.Router();
 
-cartRouter.get("/get/:userId", getCart);
+cartRouter.get("/get", getCart);
 cartRouter.post("/add", addToCart);
 cartRouter.delete("/remove", removeFromCart);
+cartRouter.put("/update", updateCart);
 
 export default cartRouter;

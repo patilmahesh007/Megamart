@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, User, ShoppingCart, ChevronDown } from 'lucide-react';
-
+import {Link} from 'react-router-dom';
 const Navbar = () => {
   return (
     <nav className="w-full bg-white shadow-sm">
@@ -39,7 +39,7 @@ const Navbar = () => {
             </button>
 
             <button className="flex items-center space-x-1 hover:text-emrald-600">
-              <ShoppingCart className="h-5 w-5" />
+              <Link to="/cart"><ShoppingCart className="h-5 w-5" /></Link>
               <span className="text-sm">Cart</span>
             </button>
           </div>

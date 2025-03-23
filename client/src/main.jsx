@@ -6,6 +6,8 @@ import Dashboard from './views/dashboard.jsx';
 import Dynamic from './views/Dynamic.jsx';
 import Home from './App.jsx';
 import SubCategoryPage from './views/SubCategoryPage.jsx';
+import Cart from './views/cart.jsx';
+
 
 import ProductDetailPage from './components/admin/ProductDetailPage.jsx';
 import AdminPanel from './views/admin.jsx';
@@ -27,6 +29,7 @@ root.render(
       <Route path="/admin/products/:id" element={<ProductDetailPage />} />
       <Route path="/category/:subcategoryId" element={<SubCategoryPage />} />
       <Route path="/product/:id" element={<UserProductDetail />} />
+      <Route path="/Cart" element={<Cart />} />
 
     </Routes>
   </BrowserRouter>

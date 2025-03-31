@@ -115,7 +115,7 @@ function Cart() {
             <img
               src={product.mainImage || 'https://via.placeholder.com/80'}
               alt={product.name}
-              className="w-20 h-20 object-cover rounded-md"
+              className="h-20 object-cover rounded-md"  
             />
             <div className="ml-3">
               <h3 className="font-semibold text-gray-800">{product.name}</h3>
@@ -154,7 +154,7 @@ function Cart() {
             <img
               src={product.mainImage || 'https://via.placeholder.com/80'}
               alt={product.name}
-              className="w-16 h-16 object-cover rounded-md mr-4"
+              className="h-16 object-cover block  rounded-md mr-4"  
             />
             <div>
               <h3 className="font-semibold text-gray-800">{product.name}</h3>

@@ -1,6 +1,19 @@
 import Cart from "../models/cart.model.js";
+import Product from "../models/product.model.js";
 import { successResponse, errorResponse } from "../utils/responder.util.js";
 import getRequestingUser from "../utils/getid.util.js";
+
+// Helper function to calculate total cart price using product.currentPrice
+const calculateTotalPrice = async (cart) => {
+  let total = 0;
+  for (let item of cart.items) {
+    const product = await Product.findById(item.product);
+    if (product && product.currentPrice) {
+      total += product.currentPrice * item.quantity;
+    }
+  }
+  return total;
+};
 
 export const getCart = async (req, res) => {
   try {
@@ -34,6 +47,7 @@ export const addToCart = async (req, res) => {
         cart.items.push({ product, quantity });
       }
     }
+    cart.totalPrice = await calculateTotalPrice(cart);
     await cart.save();
     return successResponse(res, "Cart updated successfully", cart, 200);
   } catch (error) {
@@ -54,6 +68,7 @@ export const removeFromCart = async (req, res) => {
       return errorResponse(res, "Cart not found", 404);
     }
     cart.items = cart.items.filter(item => item.product.toString() !== product);
+    cart.totalPrice = await calculateTotalPrice(cart);
     await cart.save();
     return successResponse(res, "Item removed from cart", cart, 200);
   } catch (error) {
@@ -61,6 +76,7 @@ export const removeFromCart = async (req, res) => {
     return errorResponse(res, error.message, 500);
   }
 };
+
 export const updateCart = async (req, res) => {
   try {
     const requestingUser = await getRequestingUser(req);
@@ -77,6 +93,7 @@ export const updateCart = async (req, res) => {
       return errorResponse(res, "Product not found in cart", 404);
     }
     cart.items[itemIndex].quantity = quantity;
+    cart.totalPrice = await calculateTotalPrice(cart);
     await cart.save();
     return successResponse(res, "Cart updated successfully", cart, 200);
   } catch (error) {

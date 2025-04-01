@@ -1,241 +1,80 @@
-import React, { useState, useEffect } from 'react';
-import { Line } from 'react-chartjs-2';
-import api from '../util/api.util.js';
-import { Calendar, ShoppingCart, ArrowUpRight, RefreshCw } from 'lucide-react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from 'chart.js';
+import React, { useEffect } from 'react';
+import api from '../util/api.util';
+import { toast } from 'react-hot-toast';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler
-);
-
-const OrderGraph = () => {
-  const [chartData, setChartData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('month');
-  const [totalOrders, setTotalOrders] = useState(0);
-  const [percentChange, setPercentChange] = useState(0);
-
-  const fetchData = async (range) => {
-    setLoading(true);
-    try {
-      const res = await api.get(`/order/stats?range=${range}`);
-      if (!res.data || !res.data.data) {
-        throw new Error("Unexpected API response format");
-      }
-      const { labels, counts, sales } = res.data.data;
-      
-      // Calculate total orders
-      const total = counts.reduce((sum, current) => sum + current, 0);
-      setTotalOrders(total);
-      
-      // Calculate growth rate comparing first half vs. second half of the period
-      const halfIndex = Math.floor(counts.length / 2);
-      const firstHalf = counts.slice(0, halfIndex).reduce((sum, current) => sum + current, 0);
-      const secondHalf = counts.slice(halfIndex).reduce((sum, current) => sum + current, 0);
-      const change = firstHalf > 0 ? ((secondHalf - firstHalf) / firstHalf) * 100 : 0;
-      setPercentChange(change);
-      
-      setChartData({
-        labels,
-        datasets: [
-          {
-            label: 'Orders',
-            data: counts,
-            borderColor: '#60a5fa',
-            backgroundColor: 'rgba(96, 165, 250, 0.2)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: '#fff',
-            pointBorderColor: '#60a5fa',
-            pointRadius: 4,
-            pointHoverRadius: 6,
-          }
-        ],
-      });
-    } catch (error) {
-      console.error("Error fetching order stats:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+function Payment({ total, address, orderId, onClose }) {
+  // Dynamically load the Razorpay script
   useEffect(() => {
-    fetchData(timeRange);
-  }, [timeRange]);
+    const script = document.createElement('script');
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
-  const changeTimeRange = (range) => {
-    setTimeRange(range);
-  };
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { 
-        display: false 
-      },
-      tooltip: {
-        backgroundColor: 'rgba(17, 24, 39, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: '#60a5fa',
-        borderWidth: 1,
-        padding: 10,
-        usePointStyle: true,
-        callbacks: {
-          label: function(context) {
-            return `Orders: ${context.parsed.y}`;
+  const handlePayment = () => {
+    // Using CRA's environment variable replacement
+    const razorpayKey = process.env.REACT_APP_RAZORPAY_KEY || 'YOUR_RAZORPAY_KEY';
+    
+    const options = {
+      key: razorpayKey,
+      amount: total * 100, // Amount in paisa
+      currency: "INR",
+      name: "Megamart",
+      description: "Payment for your order",
+      image: "https://yourdomain.com/logo.png", // Optional: your logo
+      // Uncomment below if your backend generates a Razorpay order id
+      // order_id: orderId,
+      handler: async function (response) {
+        try {
+          const paymentData = {
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpayOrderId: response.razorpay_order_id,
+            razorpaySignature: response.razorpay_signature,
+            orderId: orderId, // Pass orderId for payment verification if needed
+          };
+          const verifyResponse = await api.post('/payment/verify', paymentData);
+          if (verifyResponse.data.success) {
+            toast.success("Payment verified successfully!");
+            onClose(); // Close or redirect after successful payment
+          } else {
+            toast.error("Payment verification failed.");
           }
-        }
-      }
-    },
-    scales: {
-      x: {
-        grid: {
-          display: false,
-          drawBorder: false,
-        },
-        ticks: {
-          color: '#9ca3af'
+        } catch (error) {
+          console.error("Error verifying payment:", error);
+          toast.error("Payment verification error.");
         }
       },
-      y: {
-        beginAtZero: true,
-        grid: {
-          color: 'rgba(156, 163, 175, 0.1)',
-          drawBorder: false,
-        },
-        ticks: {
-          color: '#9ca3af',
-          padding: 10
-        }
-      }
-    },
-    interaction: {
-      mode: 'index',
-      intersect: false,
-    },
-    elements: {
-      point: {
-        radius: 0,
-        hoverRadius: 6,
-      }
-    },
+      prefill: {
+        name: address?.name || "",
+        email: address?.email || "",
+        contact: address?.phone || "",
+      },
+      notes: {
+        address: `${address.street}, ${address.city}, ${address.state}` || "",
+      },
+      theme: {
+        color: "#F37254",
+      },
+    };
+
+    const rzp1 = new window.Razorpay(options);
+    rzp1.open();
   };
 
   return (
-    <div className="bg-gray-800 rounded-xl shadow-lg p-6 w-full">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-teal-300 mb-1">Order Activity</h2>
-          <div className="flex items-center text-gray-400">
-            <Calendar size={16} className="mr-2" />
-            <span>
-              {timeRange === 'week' ? 'Past 7 Days' : 
-               timeRange === 'month' ? 'Past 30 Days' : 'Past 90 Days'}
-            </span>
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          <button 
-            onClick={() => changeTimeRange('week')} 
-            className={`px-3 py-1 rounded-md text-sm ${
-              timeRange === 'week' 
-                ? 'bg-teal-500 text-black' 
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            Week
-          </button>
-          <button 
-            onClick={() => changeTimeRange('month')} 
-            className={`px-3 py-1 rounded-md text-sm ${
-              timeRange === 'month' 
-                ? 'bg-teal-500 text-black' 
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            Month
-          </button>
-          <button 
-            onClick={() => changeTimeRange('quarter')} 
-            className={`px-3 py-1 rounded-md text-sm ${
-              timeRange === 'quarter' 
-                ? 'bg-teal-500 text-black' 
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            Quarter
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="bg-gray-700 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="text-gray-400 text-sm">Total Orders</div>
-            <div className="p-2 bg-teal-500/20 rounded-full">
-              <ShoppingCart size={16} className="text-teal-500" />
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-white mt-2">{totalOrders.toLocaleString()}</div>
-        </div>
-        <div className="bg-gray-700 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="text-gray-400 text-sm">Growth Rate</div>
-            <div className="p-2 bg-teal-500/20 rounded-full">
-              <ArrowUpRight size={16} className="text-teal-500" />
-            </div>
-          </div>
-          <div className={`text-2xl font-bold mt-2 ${percentChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-            {percentChange >= 0 ? '+' : ''}{percentChange.toFixed(1)}%
-          </div>
-        </div>
-      </div>
-      
-      <div className="h-64 md:h-80 relative">
-        {loading ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <RefreshCw size={24} className="text-teal-500 animate-spin" />
-          </div>
-        ) : chartData ? (
-          <Line data={chartData} options={options} />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-gray-400">No data available</p>
-          </div>
-        )}
-      </div>
-      
-      <div className="mt-4 flex justify-end">
-        <button 
-          onClick={() => fetchData(timeRange)} 
-          className="flex items-center text-sm text-teal-400 hover:text-teal-300"
-        >
-          <RefreshCw size={14} className="mr-1" />
-          Refresh Data
-        </button>
-      </div>
+    <div className="p-6">
+      <h2 className="text-2xl font-bold mb-4">Payment</h2>
+      <p className="mb-4">
+        Amount to Pay: <span className="font-semibold">₹{total}</span>
+      </p>
+      <button onClick={handlePayment} className="w-full py-2 bg-blue-600 text-white rounded">
+        Pay Now
+      </button>
     </div>
   );
-};
+}
 
-export default OrderGraph;
+export default Payment;

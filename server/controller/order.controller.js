@@ -1,13 +1,47 @@
 import Order from "../models/order.model.js";
 import { successResponse, errorResponse } from "../utils/responder.util.js";
+import getRequestingUser from "../utils/getid.util.js";
 
 export const createOrder = async (req, res) => {
   try {
-    const { user, orderItems, totalPrice, shippingAddress } = req.body;
-    if (!user || !orderItems || !totalPrice || !shippingAddress) {
-      return errorResponse(res, "All order fields are required", 400);
+    const requestingUser = await getRequestingUser(req);
+    const { orderItems, totalPrice, shippingAddress, paymentMode } = req.body;
+
+    if (!orderItems || !totalPrice || !shippingAddress) {
+      return errorResponse(res, "All order fields (orderItems, totalPrice, shippingAddress, paymentMode) are required", 400);
     }
-    const order = new Order({ user, orderItems, totalPrice, shippingAddress });
+
+    if (!Array.isArray(orderItems) || orderItems.length === 0) {
+      return errorResponse(res, "Order must contain at least one item", 400);
+    }
+
+    const formattedOrderItems = orderItems.map((item, index) => {
+      if (!item.productId) {
+        return errorResponse(res, `Missing 'product' field in orderItems[${index}]`, 400);
+      }
+      if (!item.quantity || item.quantity <= 0) {
+        return errorResponse(res, `Invalid or missing 'quantity' field in orderItems[${index}]`, 400);
+      }
+      if (!item.totalPrice || item.totalPrice <= 0) {
+        return errorResponse(res, `Invalid or missing 'price' field in orderItems[${index}]`, 400);
+      }
+
+      return {
+        product: item.productId,
+        quantity: item.quantity,
+        price: item.totalPrice, 
+      };
+    });
+
+    const order = new Order({
+      user: requestingUser._id,
+      orderItems: formattedOrderItems,
+      totalPrice,
+      shippingAddress,
+      paymentMode, 
+      paymentStatus: "pending",
+    });
+
     await order.save();
     return successResponse(res, "Order created successfully", order, 201);
   } catch (error) {
@@ -22,6 +56,7 @@ export const getOrder = async (req, res) => {
     const order = await Order.findById(id)
       .populate("user")
       .populate("orderItems.product");
+
     if (!order) {
       return errorResponse(res, "Order not found", 404);
     }
@@ -36,13 +71,22 @@ export const updateOrderStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
+
     if (!status) {
       return errorResponse(res, "Status is required", 400);
     }
+
+    const validStatuses = ["pending", "shipped", "delivered", "cancelled"];
+    if (!validStatuses.includes(status)) {
+      return errorResponse(res, "Invalid status", 400);
+    }
+
     const order = await Order.findByIdAndUpdate(id, { status }, { new: true });
+
     if (!order) {
       return errorResponse(res, "Order not found", 404);
     }
+
     return successResponse(res, "Order status updated successfully", order, 200);
   } catch (error) {
     console.error("Error updating order status:", error);
@@ -57,6 +101,7 @@ export const listOrders = async (req, res) => {
     const orders = await Order.find(filter)
       .populate("user")
       .populate("orderItems.product");
+
     return successResponse(res, "Orders fetched successfully", orders, 200);
   } catch (error) {
     console.error("Error listing orders:", error);

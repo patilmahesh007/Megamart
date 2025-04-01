@@ -3,18 +3,36 @@ import Product from "../models/product.model.js";
 import { successResponse, errorResponse } from "../utils/responder.util.js";
 import getRequestingUser from "../utils/getid.util.js";
 
-// Helper function to calculate total cart price using product.currentPrice
-const calculateTotalPrice = async (cart) => {
+export const calculateTotalPrice = async (cart) => {
   let total = 0;
+  const productIds = cart.items.map(item => item.product);
+  const products = await Product.find({ _id: { $in: productIds } });
+  const productMap = {};
+  products.forEach(product => {
+    productMap[product._id.toString()] = product;
+  });
   for (let item of cart.items) {
-    const product = await Product.findById(item.product);
-    if (product && product.currentPrice) {
-      total += product.currentPrice * item.quantity;
+    const prod = productMap[item.product.toString()];
+    if (prod && prod.currentPrice) {
+      total += Number(prod.currentPrice) * Number(item.quantity);
     }
   }
   return total;
 };
-
+export const getCartTotal = async (req, res) => {
+  try {
+    const requestingUser = await getRequestingUser(req);
+    const cart = await Cart.findOne({ user: requestingUser._id });
+    if (!cart) {
+      return errorResponse(res, "Cart not found", 404);
+    }
+    const total = await calculateTotalPrice(cart);
+    return successResponse(res, "Cart total calculated successfully", { total });
+  } catch (error) {
+    console.error("Error calculating total price:", error);
+    return errorResponse(res, error.message, 500);
+  }
+};
 export const getCart = async (req, res) => {
   try {
     const requestingUser = await getRequestingUser(req);

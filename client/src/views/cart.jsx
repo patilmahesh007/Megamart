@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import api from '../util/api.util';
 import Header from '../components/Header';
 import { toast } from 'react-hot-toast';
+import Checkout from '../components/Checkout.jsx';
 
 function Cart() {
   const [cartData, setCartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showCheckout, setShowCheckout] = useState(false);
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -46,6 +48,10 @@ function Cart() {
       console.error('Error updating cart:', err);
       toast.error('Failed to update cart');
     }
+  };
+
+  const handleCheckout = () => {
+    setShowCheckout(true);
   };
 
   if (loading) {
@@ -92,7 +98,6 @@ function Cart() {
 
   const moneySaved = totalOriginal > subtotal ? totalOriginal - subtotal : 0;
   const percentSaved = totalOriginal > 0 ? (moneySaved / totalOriginal) * 100 : 0;
-
   const shipping = 0;
   const taxes = 0;
   const discount = 0;
@@ -232,7 +237,10 @@ function Cart() {
               <span>₹{total.toFixed(2)}</span>
             </div>
           </div>
-          <button className="w-full mt-4 py-3 bg-green-700 hover:bg-green-800 transition text-white font-medium rounded">
+          <button
+            className="w-full mt-4 py-3 bg-green-700 hover:bg-green-800 transition text-white font-medium rounded"
+            onClick={handleCheckout}
+          >
             Proceed to Checkout
           </button>
         </div>
@@ -245,28 +253,21 @@ function Cart() {
       <Header />
       <div className="container mx-auto px-4 py-6 min-h-screen bg-gray-50" style={{ maxWidth: '80vw' }}>
         <h1 className="text-3xl font-bold mb-2 text-center text-gray-800">Shopping Cart</h1>
-        <div className="flex justify-center items-center mb-8 text-sm text-gray-500">
-          <Link to="/" className="hover:text-gray-700">Home</Link>
-          <span className="mx-2">/</span>
-          <span>Shopping Cart</span>
+        <div className="flex justify-center items-center mb-8 text-sm text-gray-600">
+          {totalItems} Items in Cart
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <div className="hidden sm:grid grid-cols-12 bg-yellow-300 rounded-t-lg p-4 font-semibold text-gray-700">
-              <div className="col-span-6">Product</div>
-              <div className="col-span-2 text-center">Price</div>
-              <div className="col-span-2 text-center">Quantity</div>
-              <div className="col-span-2 text-center">Subtotal</div>
-            </div>
-            <div className="space-y-2 sm:space-y-0">
-              {cartData.items.map((item) => (
-                <CartItem key={item.product._id} item={item} updateQuantity={updateQuantity} />
-              ))}
-            </div>
+        <div className="flex flex-col sm:flex-row">
+          <div className="flex flex-col sm:w-8/12 md:w-9/12">
+            {cartData.items.map((item) => (
+              <CartItem key={item.product._id} item={item} updateQuantity={updateQuantity} />
+            ))}
           </div>
-          <CartSummary />
+          <div className="ml-0 sm:ml-4 sm:w-4/12 md:w-3/12 mt-6 sm:mt-0">
+            <CartSummary />
+          </div>
         </div>
       </div>
+      {showCheckout && <Checkout onClose={() => setShowCheckout(false)} />}
     </>
   );
 }

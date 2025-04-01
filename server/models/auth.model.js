@@ -1,4 +1,4 @@
-  import mongoose from 'mongoose';
+import mongoose from 'mongoose';
 
 const AddressSchema = new mongoose.Schema({
   street: { type: String },
@@ -6,21 +6,21 @@ const AddressSchema = new mongoose.Schema({
   state: { type: String },
   zipCode: { type: String },
   country: { type: String },
+  phone: { type: String }
 }, { _id: false });
 
 const UserSchema = new mongoose.Schema({
   name: { type: String, trim: true },
-  email: { type: String, lowercase: true, trim: true, unique: true},
+  email: { type: String, lowercase: true, trim: true, unique: true },
   password: { type: String },
-  phone: { type: String, required: true, unique: true, trim: true },
+  phone: { type: String, required: true, unique: true, trim: true }, 
   disabled: { type: Boolean, default: false },
   profileImage: { type: String },
   otp: { type: String },
   otpExpiresAt: { type: Date },
   isVerified: { type: Boolean, default: false },
   addresses: [AddressSchema],
-  lastLogin: { type: Date, default: Date.now }
-  ,
+  lastLogin: { type: Date, default: Date.now },
   role: {
     type: String,
     enum: ['customer', 'admin', 'superadmin'],

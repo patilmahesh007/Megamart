@@ -76,7 +76,7 @@ export const updateOrderStatus = async (req, res) => {
       return errorResponse(res, "Status is required", 400);
     }
 
-    const validStatuses = ["pending", "shipped", "delivered", "cancelled"];
+    const validStatuses = ["pending", "shipped", "delivered", "cancelled by user", "cancelled by admin"];
     if (!validStatuses.includes(status)) {
       return errorResponse(res, "Invalid status", 400);
     }
@@ -105,6 +105,55 @@ export const listOrders = async (req, res) => {
     return successResponse(res, "Orders fetched successfully", orders, 200);
   } catch (error) {
     console.error("Error listing orders:", error);
+    return errorResponse(res, error.message, 500);
+  }
+};
+
+export const getUserOrders = async (req, res) => {
+  try {
+    const user = await getRequestingUser(req);
+    if (!user) {
+      return errorResponse(res, "Unauthorized request", 401);
+    }
+    const orders = await Order.find({ user: user._id })
+      .populate("user")
+      .populate("orderItems.product");
+    return successResponse(res, "User orders fetched successfully", { orders }, 200);
+  } catch (error) {
+    console.error("Error fetching user orders:", error);
+    return errorResponse(res, error.message, 500);
+  }
+};
+export const updateOrderStatusByUserId = async (req, res) => {
+  try {
+    const user = await getRequestingUser(req);
+    if (!user) {
+      return errorResponse(res, "Unauthorized request", 401);
+    }
+    
+    const { orderId, status } = req.body;
+    if (!orderId || !status) {
+      return errorResponse(res, "Order ID and status are required", 400);
+    }
+
+    const validStatuses = ["pending", "shipped", "delivered", "cancelled by user", "cancelled by admin"];
+    if (!validStatuses.includes(status)) {
+      return errorResponse(res, "Invalid status", 400);
+    }
+
+    const order = await Order.findOneAndUpdate(
+      { _id: orderId, user: user._id },
+      { status },
+      { new: true }
+    );
+
+    if (!order) {
+      return errorResponse(res, "Order not found or unauthorized to update", 404);
+    }
+
+    return successResponse(res, "Order status updated successfully", order, 200);
+  } catch (error) {
+    console.error("Error updating order status:", error);
     return errorResponse(res, error.message, 500);
   }
 };

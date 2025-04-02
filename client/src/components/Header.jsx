@@ -33,15 +33,15 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-6">
-            <button className="flex items-center space-x-1 hover:text-emrald-600">
+            <Link to="/profile" className="flex items-center space-x-1 hover:text-emrald-600">
               <User className="h-5 w-5" />
               <span className="text-sm">Profile</span>
-            </button>
+            </Link>
 
-            <button className="flex items-center space-x-1 hover:text-emrald-600">
-              <Link to="/cart"><ShoppingCart className="h-5 w-5" /></Link>
+            <Link to="/cart" className="flex items-center space-x-1 hover:text-emrald-600">
+             <ShoppingCart className="h-5 w-5" />
               <span className="text-sm">Cart</span>
-            </button>
+            </Link>
           </div>
         </div>
       </div>

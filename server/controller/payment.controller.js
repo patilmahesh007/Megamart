@@ -4,6 +4,7 @@ import Razorpay from "razorpay";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import getRequestingUser from "../utils/getid.util.js";
+import Order from "../models/order.model.js";
 
 dotenv.config();
 
@@ -40,8 +41,9 @@ export const createPaymentOrder = async (req, res) => {
 
 export const verifyPayment = async (req, res) => {
   try {
-    const { orderId, paymentId, signature, amount } = req.body;
-    if (!orderId || !paymentId || !signature || !amount) {
+    const { orderId, razorpayOrderId, paymentId, signature, amount } = req.body;
+
+    if (!orderId || !razorpayOrderId || !paymentId || !signature || !amount) {
       return errorResponse(res, "Missing required payment details", 400);
     }
 
@@ -52,16 +54,27 @@ export const verifyPayment = async (req, res) => {
 
     const generatedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(`${orderId}|${paymentId}`)
+      .update(`${razorpayOrderId}|${paymentId}`)
       .digest("hex");
 
     if (generatedSignature !== signature) {
       return errorResponse(res, "Invalid Razorpay signature", 400);
     }
 
+    const order = await Order.findById(orderId); 
+    if (!order) {
+      return errorResponse(res, "Order not found", 404);
+    }
+    order.status = "Order Confirmed";
+    order.paymentStatus = "paid"; 
+    order.razorpayPaymentId = paymentId; 
+    
+    await order.save();
+
     const payment = new Payment({
       user: user._id,
-      razorpayOrderId: orderId,
+      order: order._id,
+      razorpayOrderId,
       razorpayPaymentId: paymentId,
       razorpaySignature: signature,
       amount,
@@ -70,7 +83,7 @@ export const verifyPayment = async (req, res) => {
 
     await payment.save();
 
-    return successResponse(res, "Payment verified and stored successfully", { payment }, 200);
+    return successResponse(res, "Payment verified and order updated successfully", { payment }, 200);
   } catch (error) {
     console.error("Error verifying payment:", error);
     return errorResponse(res, "Internal Server Error", 500);

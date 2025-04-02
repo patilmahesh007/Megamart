@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Payment from './Payment';
-import api from '../util/api.util'; // Assuming you have a utility for making API calls
+import api from '../util/api.util';
 import { toast } from 'react-hot-toast';
 
 function Checkout({ onClose }) {
@@ -18,6 +18,7 @@ function Checkout({ onClose }) {
   const [isAddingNewAddress, setIsAddingNewAddress] = useState(false);
   const [total, setTotal] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
+  const [orderId, setOrderId] = useState(null); // To store created order ID
 
   // Fetch user addresses and cart data
   useEffect(() => {
@@ -66,7 +67,14 @@ function Checkout({ onClose }) {
   const handlePay = async () => {
     const addressToUse = isAddingNewAddress ? newAddress : selectedAddress;
 
-    if (!addressToUse || !addressToUse.street || !addressToUse.city || !addressToUse.state || !addressToUse.zipCode || !addressToUse.country) {
+    if (
+      !addressToUse ||
+      !addressToUse.street ||
+      !addressToUse.city ||
+      !addressToUse.state ||
+      !addressToUse.zipCode ||
+      !addressToUse.country
+    ) {
       toast.error('Please fill all required address fields.');
       return;
     }
@@ -77,19 +85,23 @@ function Checkout({ onClose }) {
     }
 
     try {
+      const formattedOrderItems = orderItems.map(item => ({
+        productId: item.product._id,
+        quantity: item.quantity,
+        totalPrice: item.product.currentPrice
+      }));
+
       const orderData = {
-        orderItems: orderItems.map(item => ({
-          productId: item.product._id,
-          quantity: item.quantity,
-          totalPrice: item.product.currentPrice
-        })),
+        orderItems: formattedOrderItems,
         totalPrice: total,
-        shippingAddress: addressToUse
+        shippingAddress: addressToUse,
+        paymentMode: "razorpay"
       };
 
       const response = await api.post('/order/create', orderData);
 
       if (response.data.success) {
+        setOrderId(response.data.data._id);
         setShowPayment(true);
         toast.success('Order created successfully! Proceeding to payment.');
       } else {
@@ -120,7 +132,9 @@ function Checkout({ onClose }) {
                 <input type="text" name="zipCode" value={newAddress.zipCode} onChange={handleInputChange} placeholder="Zip Code" className="border p-2 w-full rounded" />
                 <input type="text" name="country" value={newAddress.country} onChange={handleInputChange} placeholder="Country" className="border p-2 w-full rounded" />
                 <input type="text" name="phone" value={newAddress.phone} onChange={handleInputChange} placeholder="Phone (optional)" className="border p-2 w-full rounded" />
-                <button onClick={() => setIsAddingNewAddress(false)} className="bg-blue-600 text-white py-2 px-4 rounded w-full">Save New Address</button>
+                <button onClick={() => setIsAddingNewAddress(false)} className="bg-blue-600 text-white py-2 px-4 rounded w-full">
+                  Save New Address
+                </button>
               </div>
             ) : (
               <>
@@ -141,14 +155,18 @@ function Checkout({ onClose }) {
                     ))}
                   </div>
                 )}
-                <button onClick={() => setIsAddingNewAddress(true)} className="text-blue-600 mt-4">Add New Address</button>
+                <button onClick={() => setIsAddingNewAddress(true)} className="text-blue-600 mt-4">
+                  Add New Address
+                </button>
               </>
             )}
 
-            <button onClick={handlePay} className="w-full mt-4 py-2 bg-green-600 text-white rounded">Pay ₹{total}</button>
+            <button onClick={handlePay} className="w-full mt-4 py-2 bg-green-600 text-white rounded">
+              Pay ₹{total}
+            </button>
           </>
         ) : (
-          <Payment total={total} address={selectedAddress || newAddress} onClose={onClose} />
+          <Payment total={total} address={selectedAddress || newAddress} orderId={orderId} onClose={onClose} />
         )}
       </div>
     </div>

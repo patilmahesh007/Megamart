@@ -23,7 +23,7 @@ function Cart() {
         }
       } catch (err) {
         console.error('Error fetching cart:', err);
-        setError('Unable to fetch cart data');
+        setError('please login first');
       } finally {
         setLoading(false);
       }

@@ -3,7 +3,7 @@ import { createPaymentOrder, verifyPayment } from "../controller/payment.control
 
 const paymentRouter = express.Router();
 
-paymentRouter.post("/create-order", createPaymentOrder);
+paymentRouter.post("/create", createPaymentOrder);
 paymentRouter.post("/verify-payment", verifyPayment);
 
 export default paymentRouter;

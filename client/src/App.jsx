@@ -97,15 +97,15 @@ const WelcomeBanner = () => {
         <div className="md:w-2/5 flex justify-center">
           <div className="relative">
             <div className="w-48 h-48 bg-white bg-opacity-20 rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-            <img 
+            {/* <img 
               src="/images/grocery-basket.png" 
               alt="Fresh groceries" 
               className="w-64 h-64 object-contain relative z-10"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = "https://via.placeholder.com/250x250?text=Fresh+Groceries";
+                e.target.src = ".a";
               }}
-            />
+            /> */}
           </div>
         </div>
       </div>

@@ -24,8 +24,8 @@ const OrderSchema = new mongoose.Schema({
   },
   status: { 
     type: String, 
-    enum: ['pending', 'shipped', 'delivered', 'cancelled'], 
-    default: 'pending' 
+    enum: ['Payment Pending','Order Confirmed', 'shipped', 'delivered', 'cancelled by user', 'cancelled by admin'], 
+    default: 'Payment Pending' 
   },
   paymentStatus: { 
     type: String, 
@@ -33,21 +33,19 @@ const OrderSchema = new mongoose.Schema({
     default: 'pending' 
   },
   paymentMode: { type: String,  },
-  razorpayPaymentId: { type: String, default: null }, // Nullable until payment is done
-  trackingNumber: { type: String, default: null }, // Generated only when shipped
+  razorpayPaymentId: { type: String, default: null }, 
+  trackingNumber: { type: String, default: null }, 
   notes: { type: String },
-  deliveredAt: { type: Date, default: null }, // When delivered
+  deliveredAt: { type: Date, default: null },
 
 }, {
   timestamps: true,
 });
 
-// Function to enforce at least one order item
 function arrayLimit(val) {
   return val.length > 0;
 }
 
-// Generate unique orderId before saving
 OrderSchema.pre('save', async function (next) {
   if (!this.orderId) {
     this.orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 10000)}`;

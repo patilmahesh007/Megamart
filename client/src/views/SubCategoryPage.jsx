@@ -1,11 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import api from './../util/api.util';
 import { toast } from 'react-hot-toast';
 
+
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
+
 const ProductCard = ({ product }) => {
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(1); 
   const [cartQuantity, setCartQuantity] = useState(0);
+
+  const getLocalCart = () => {
+    const data = localStorage.getItem('cart');
+    return data ? JSON.parse(data) : {};
+  };
+
+  const setLocalCart = (cart) => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  };
+
+  useEffect(() => {
+    if (product) {
+      const localCart = getLocalCart();
+      setCartQuantity(localCart[product._id] || 0);
+    }
+  }, [product]);
 
   useEffect(() => {
     const fetchCartQuantity = async () => {
@@ -14,7 +41,12 @@ const ProductCard = ({ product }) => {
         if (res.data.success) {
           const items = res.data.data.items;
           const found = items.find((item) => item.product._id === product._id);
-          setCartQuantity(found ? found.quantity : 0);
+          if (found) {
+            setCartQuantity(found.quantity);
+            const localCart = getLocalCart();
+            localCart[product._id] = found.quantity;
+            setLocalCart(localCart);
+          }
         }
       } catch (error) {
         console.error('Error fetching cart quantity:', error);
@@ -25,15 +57,45 @@ const ProductCard = ({ product }) => {
     }
   }, [product]);
 
+  const debouncedUpdateCartQuantity = useMemo(
+    () =>
+      debounce(async (newQuantity) => {
+        try {
+          await api.put('/cart/update', { productId: product._id, quantity: newQuantity });
+          toast.success('Cart updated!');
+        } catch (error) {
+          console.error('Error updating cart quantity on server:', error);
+          toast.error('Failed to update cart on server');
+        }
+      }, 1000),
+    [product]
+  );
+
+  const updateCartQuantity = (newQuantity) => {
+    setCartQuantity(newQuantity);
+    const localCart = getLocalCart();
+    localCart[product._id] = newQuantity;
+    setLocalCart(localCart);
+    debouncedUpdateCartQuantity(newQuantity);
+  };
+
   const handleAddToCart = async () => {
     try {
       await api.post('/cart/add', { product: product._id, quantity });
       toast.success('Item added to cart!');
-      setCartQuantity(quantity);
+      updateCartQuantity(quantity);
     } catch (error) {
       console.error('Error adding to cart:', error);
       toast.error('Failed to add item to cart');
     }
+  };
+
+  const incrementCart = () => {
+    updateCartQuantity(cartQuantity + 1);
+  };
+
+  const decrementCart = () => {
+    updateCartQuantity(Math.max(0, cartQuantity - 1));
   };
 
   return (
@@ -56,14 +118,14 @@ const ProductCard = ({ product }) => {
         {cartQuantity > 0 ? (
           <div className="flex items-center justify-center space-x-4 border border-gray-300 rounded-lg p-2 w-full">
             <button
-              onClick={() => setCartQuantity((prev) => Math.max(0, prev - 1))}
+              onClick={decrementCart}
               className="w-10 h-10 flex justify-center items-center bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
             >
               –
             </button>
             <span className="text-xl font-semibold">{cartQuantity}</span>
             <button
-              onClick={() => setCartQuantity((prev) => prev + 1)}
+              onClick={incrementCart}
               className="w-10 h-10 flex justify-center items-center bg-purple-600 text-white rounded hover:bg-purple-700 transition"
             >
               +
@@ -124,12 +186,20 @@ const SubCategoryPage = () => {
         Subcategory Products
       </h1>
       {products.length === 0 ? (
-        <p className="text-gray-600 text-center">No products found in this subcategory.</p>
+        <p className="text-gray-600 text-center">
+          No products found in this subcategory.
+        </p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
-          ))}
+          {products.map((product) =>
+            product && product._id ? (
+              <ProductCard key={product._id} product={product} />
+            ) : (
+              <div key={product?._id || product?.name} className="text-red-500">
+                Invalid product data
+              </div>
+            )
+          )}
         </div>
       )}
     </div>

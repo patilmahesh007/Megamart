@@ -29,20 +29,6 @@ export const getUserById = async (req, res) => {
 };
 
 
-export const updateUser = async (req, res) => {
-  try {
-    const requestingUser = await getRequestingUser(req);
-    const id = requestingUser._id;
-    const updates = req.body;
-    const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
-    if (!updatedUser) return errorResponse(res, "User not found", 404);
-    return successResponse(res, "User updated successfully", { user: updatedUser });
-  } catch (error) {
-    console.error("Error updating user:", error);
-    return errorResponse(res, "Failed to update user", 500);
-  }
-};
-
 export const disableUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -119,6 +105,40 @@ export const addUserAddress = async (req, res) => {
     return errorResponse(res, "Failed to add user address", 500);
   }
 };
+export const updateUser = async (req, res) => {
+  try {
+    const requestingUser = await getRequestingUser(req);
+    const id = requestingUser._id;
+    const { name, phone } = req.body;
+
+    const updates = {};
+    if (name) updates.name = name;
+    if (phone) updates.phone = phone;
+
+    if (req.file) {
+      updates.profileImage = req.file.path;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
+    if (!updatedUser) return errorResponse(res, "User not found", 404);
+
+    return successResponse(res, "User updated successfully", {
+      user: {
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        phone: updatedUser.phone,
+        profileImage: updatedUser.profileImage || "",
+        role: updatedUser.role,
+        isVerified: updatedUser.isVerified,
+        disabled: updatedUser.disabled,
+        addresses: updatedUser.addresses || []
+      }
+    });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    return errorResponse(res, "Failed to update user", 500);
+  }
+};
 
 export const updateUserAddress = async (req, res) => {
   try {
@@ -149,6 +169,71 @@ export const getUserAddress = async (req, res) => {
   } catch (error) {
     console.error("Error fetching user addresses:", error);
     return errorResponse(res, "Failed to fetch user addresses", 500);
+  }
+};
+
+
+export const getUserProfile = async (req, res) => {
+  try {
+    const user = await getRequestingUser(req);
+    if (!user) {
+      return errorResponse(res, "User not found", 404);
+    }
+    return successResponse(res, "User profile fetched successfully", {
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        profileImage: user.profileImage,
+        isVerified: user.isVerified,
+        role: user.role,
+        addresses: user.addresses,
+        lastLogin: user.lastLogin,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    return errorResponse(res, "Failed to fetch user profile", 500);
+  }
+};
+
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const user = await getRequestingUser(req);
+    if (!user) {
+      return errorResponse(res, "User not found", 404);
+    }
+
+    const { name, phone } = req.body;
+    if (name) user.name = name;
+    if (phone) user.phone = phone;
+
+    if (req.file) {
+      user.profileImage = req.file.path;
+    }
+
+    await user.save();
+
+    return successResponse(res, "User profile updated successfully", {
+      user: {
+        _id: user._id,
+        name: user.name,
+        phone: user.phone,
+        profileImage: user.profileImage || "",
+        role: user.role,
+        isVerified: user.isVerified,
+        disabled: user.disabled,
+        addresses: user.addresses || []
+      }
+    });
+
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return errorResponse(res, "Failed to update user profile", 500);
   }
 };
 

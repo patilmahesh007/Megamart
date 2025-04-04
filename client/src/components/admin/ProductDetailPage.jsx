@@ -84,7 +84,6 @@ const ProductDetailPage = () => {
   }, []);
   
   useEffect(() => {
-    console.log("Product ID:", id);
   }, [id]);
   
   const handleInputChange = (e) => {

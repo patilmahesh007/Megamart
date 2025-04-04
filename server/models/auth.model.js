@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
   profileImage: { type: String },
   otp: { type: String },
   otpExpiresAt: { type: Date },
-  isVerified: { type: Boolean, default: false },
+  isVerified: { type: Boolean, default: false },  
   addresses: [AddressSchema],
   lastLogin: { type: Date, default: Date.now },
   role: {
